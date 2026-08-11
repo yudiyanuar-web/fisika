@@ -1,6 +1,6 @@
 # 🔬 Simulasi Fisika Interaktif
 
-Website simulasi fisika interaktif bergaya PhET untuk jenjang **SD, SMP, dan SMA**, disusun dengan struktur navigasi 3 tingkat: **Beranda → Topik → Jenjang**. Setiap simulasi jenjang dilengkapi Lembar Kerja Siswa (LKS) dan panduan guru.
+Website simulasi fisika interaktif untuk jenjang **SD, SMP, dan SMA**, disusun dengan struktur navigasi 3 tingkat: **Beranda → Topik → Jenjang**. Setiap simulasi jenjang dilengkapi Lembar Kerja Siswa (LKS) dan panduan guru.
 
 ## 🧭 Struktur Navigasi
 
