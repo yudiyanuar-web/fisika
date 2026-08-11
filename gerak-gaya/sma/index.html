@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinamika Bidang Miring - SMA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef1f5;
+    --ink:#161c26;
+    --muted:#5c6478;
+    --card:#ffffff;
+    --console:#161c26;
+    --console-text:#e8ecf5;
+    --console-dim:#8891ab;
+    --gold:#b8912c;
+    --purple:#7c5cff;   /* weight */
+    --green:#1f9d63;    /* normal */
+    --red:#e2493d;      /* friction */
+    --blue:#2f6fed;     /* applied force */
+    --radius:16px;
+    --shadow:0 12px 28px rgba(22,28,38,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:'IBM Plex Sans', sans-serif;
+    background:var(--paper);color:var(--ink);min-height:100vh;padding-bottom:40px;
+  }
+  h1,h2,h3,.display{font-family:'Fraunces', serif;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  header.top{max-width:1180px;margin:0 auto;padding:22px 20px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{width:48px;height:48px;border-radius:10px;background:var(--console);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold);box-shadow:var(--shadow);}
+  .brand h1{font-size:22px;margin:0;line-height:1.15;font-weight:600;}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:600;}
+
+  .level-track{display:flex;gap:8px;}
+  .level-pill{font-family:'IBM Plex Sans';font-size:13px;padding:7px 14px;border-radius:999px;font-weight:700;border:2px solid transparent;}
+  .level-pill.done{background:#e7f7ee;color:#1c8a52;border-color:#bfe9d3;text-decoration:none;cursor:pointer;}
+  .level-pill.done:hover{border-color:#1c8a52;}
+  .level-pill.active{background:var(--console);color:var(--gold);}
+  .breadcrumb{max-width:1180px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096a8;}
+  .breadcrumb a{color:var(--muted);text-decoration:none;}
+  .breadcrumb a:hover{color:var(--gold);text-decoration:underline;}
+
+  main{max-width:1180px;margin:0 auto;padding:8px 20px;}
+  .layout{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:920px){ .layout{grid-template-columns:1fr;} }
+
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .scene-wrap{position:relative;border-radius:12px;overflow:hidden;background:#fbfbfd;border:1px solid #e3e6ef;}
+  canvas#scene{display:block;width:100%;height:auto;}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 4px 2px;font-size:12px;font-weight:600;color:var(--muted);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+
+  .console{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;background:var(--console);border-radius:12px;padding:12px 14px;}
+  .console .readout{flex:1;min-width:98px;}
+  .console .readout .l{font-size:10px;color:var(--console-dim);letter-spacing:.4px;text-transform:uppercase;font-weight:700;}
+  .console .readout .v{font-size:17px;color:var(--console-text);font-weight:600;}
+  .console .readout .v.status{font-size:13px;color:var(--gold);}
+
+  .graphs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  .graph-card{background:var(--paper);border-radius:10px;padding:10px 10px 4px;}
+  .graph-card h4{margin:0 0 4px 2px;font-size:11.5px;color:var(--muted);font-weight:700;}
+  canvas.graph{display:block;width:100%;height:100px;}
+  @media (max-width:560px){ .graphs{grid-template-columns:1fr;} }
+
+  .card h3{margin:0 0 10px;font-size:16px;font-weight:600;}
+  .field{margin-bottom:16px;}
+  .field .row-label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;}
+  .field .row-label span.val{color:var(--gold);font-family:'IBM Plex Mono';}
+  input[type=range]{width:100%;accent-color:var(--gold);}
+
+  .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  .choice-btn{flex:1 1 auto;min-width:96px;border:2px solid #e3e6ef;background:#fbfbfd;border-radius:10px;padding:9px 6px;font-weight:700;font-size:12.5px;color:var(--ink);cursor:pointer;text-align:center;}
+  .choice-btn small{display:block;color:var(--muted);font-weight:600;font-family:'IBM Plex Mono';font-size:10.5px;margin-top:2px;}
+  .choice-btn.selected{border-color:var(--gold);background:#fbf3df;color:#8a6a10;}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--paper);padding:12px 14px;border-radius:10px;margin:14px 0;}
+  .toggle-row .lbl{font-weight:700;font-size:13.5px;}
+  .switch{position:relative;width:52px;height:28px;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider-toggle{position:absolute;cursor:pointer;inset:0;background:#c9cfe8;border-radius:999px;transition:.2s;}
+  .slider-toggle::before{content:"";position:absolute;height:22px;width:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+  input:checked + .slider-toggle{background:var(--blue);}
+  input:checked + .slider-toggle::before{transform:translateX(24px);}
+
+  .reset-btn{width:100%;padding:10px;border-radius:10px;border:2px solid #e3e6ef;background:#fff;font-weight:800;color:var(--muted);cursor:pointer;}
+
+  .theory-box{background:var(--paper);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:13px;line-height:1.85;}
+  .theory-box b.mono{color:var(--gold);}
+
+  .note{background:#fbf3df;border:1px solid #eddba9;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#8a6a10;margin-top:12px;}
+  #celebrate{display:none;margin-top:10px;background:#e7f7ee;border:1px solid #bfe9d3;color:#1c8a52;border-radius:10px;padding:10px 12px;font-weight:800;font-size:13px;}
+
+  table.history{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;}
+  table.history th,table.history td{padding:6px 4px;text-align:center;border-bottom:1px solid #eef0fa;}
+  table.history th{color:var(--muted);font-size:10px;text-transform:uppercase;}
+  .empty-row td{color:#b7bad2;font-style:italic;padding:14px 0;}
+
+  details.help{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-top:18px;}
+  details.help + details.help{margin-top:12px;}
+  details.help summary{font-family:'Fraunces';font-size:16px;cursor:pointer;list-style:none;font-weight:600;}
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--gold);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol,details.help ul{padding-left:20px;line-height:1.8;}
+
+  footer{max-width:1180px;margin:26px auto 0;padding:0 20px;font-size:12px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Gerak &amp; Gaya</a> › <b>SMA</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">△</div>
+    <div>
+      <h1>Dinamika Bidang Miring</h1>
+      <p>Simulasi Fisika Interaktif — Seri 3 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <a class="level-pill done" href="../sd/index.html">← SD</a>
+    <a class="level-pill done" href="../smp/index.html">← SMP</a>
+    <span class="level-pill active">SMA</span>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <div class="card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="400"></canvas>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--purple)"></i>Gaya berat (w = mg)</span>
+        <span><i style="background:var(--green)"></i>Gaya normal (N)</span>
+        <span><i style="background:var(--red)"></i>Gaya gesek (f)</span>
+        <span><i style="background:var(--blue)"></i>Gaya tarik (F)</span>
+      </div>
+
+      <div class="console">
+        <div class="readout"><div class="l">Sudut</div><div class="v mono" id="hud-theta">20°</div></div>
+        <div class="readout"><div class="l">Posisi (s)</div><div class="v mono" id="hud-s">0.00 m</div></div>
+        <div class="readout"><div class="l">Kecepatan</div><div class="v mono" id="hud-v">0.00 m/s</div></div>
+        <div class="readout"><div class="l">Percepatan</div><div class="v mono" id="hud-a">0.00 m/s²</div></div>
+        <div class="readout"><div class="l">Status</div><div class="v status" id="hud-status">Diam</div></div>
+      </div>
+
+      <div class="graphs">
+        <div class="graph-card"><h4>Grafik v–t</h4><canvas class="graph" id="graph-v" width="420" height="100"></canvas></div>
+        <div class="graph-card"><h4>Grafik s–t</h4><canvas class="graph" id="graph-s" width="420" height="100"></canvas></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>⚙️ Pengaturan Bidang Miring</h3>
+
+        <div class="field">
+          <div class="row-label"><span>Sudut Kemiringan (θ)</span><span class="val mono" id="angle-val">20°</span></div>
+          <input type="range" id="angle-slider" min="0" max="45" step="1" value="20">
+        </div>
+
+        <div class="field">
+          <div class="row-label"><span>Massa Benda</span><span class="val mono" id="mass-val">4 kg</span></div>
+          <input type="range" id="mass-slider" min="1" max="10" step="1" value="4">
+        </div>
+
+        <div class="field">
+          <div class="row-label"><span>Permukaan Bidang</span></div>
+          <div class="choice-row" id="surface-row">
+            <button class="choice-btn selected" data-surface="licin" data-mus="0.1" data-muk="0.08">Licin (oli)<small>μs 0.10 · μk 0.08</small></button>
+            <button class="choice-btn" data-surface="kayu" data-mus="0.4" data-muk="0.3">Kayu<small>μs 0.40 · μk 0.30</small></button>
+            <button class="choice-btn" data-surface="karet" data-mus="0.7" data-muk="0.6">Karet Kasar<small>μs 0.70 · μk 0.60</small></button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="row-label"><span>Gaya Tarik ke Atas Bidang (F)</span><span class="val mono" id="force-val">0 N</span></div>
+          <input type="range" id="force-slider" min="0" max="60" step="1" value="0">
+        </div>
+        <div class="toggle-row">
+          <span class="lbl">Aktifkan Gaya Tarik F</span>
+          <label class="switch"><input type="checkbox" id="force-toggle"><span class="slider-toggle"></span></label>
+        </div>
+
+        <button class="reset-btn" id="reset-btn">↺ Reset Percobaan</button>
+
+        <div class="theory-box" id="calc-box">
+          w = mg = <b class="mono">40.0 N</b> · w∥ = mg sinθ = <b class="mono">13.7 N</b> · N = mg cosθ = <b class="mono">37.6 N</b><br>
+          f statis maksimum = μs·N = <b class="mono">3.8 N</b> · f kinetis = μk·N = <b class="mono">3.0 N</b><br>
+          Sudut kritis (θc = arctan μs) = <b class="mono">5.7°</b>
+        </div>
+
+        <div class="note">🎯 Tantangan: geser sudut (dengan F = 0) sampai benda <b>tepat mulai meluncur</b>. Bandingkan sudutmu dengan sudut kritis teoritis di atas!</div>
+        <div id="celebrate">✅ Mendekati sudut kritis! Di sinilah w∥ ≈ f statis maksimum.</div>
+      </div>
+
+      <div class="card">
+        <h3>📒 Catatan Percobaan</h3>
+        <table class="history">
+          <thead><tr><th>No</th><th>θ (°)</th><th>m (kg)</th><th>Permukaan</th><th>F (N)</th><th>a (m/s²)</th></tr></thead>
+          <tbody id="history-body"><tr class="empty-row"><td colspan="6">Jalankan percobaan hingga benda berhenti untuk mencatat data.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Atur <b>sudut kemiringan</b>, <b>massa benda</b>, dan pilih <b>permukaan bidang</b> (menentukan μs dan μk).</li>
+      <li>Amati apakah benda tetap diam atau mulai meluncur — perhatikan kotak perhitungan yang membandingkan w∥ dengan f statis maksimum.</li>
+      <li>Aktifkan <b>Gaya Tarik F</b> untuk mencoba menarik benda naik sepanjang bidang, dan amati perubahan grafik v–t dan s–t.</li>
+      <li>Cari <b>sudut kritis</b>: sudut minimum agar benda tepat mulai bergerak turun tanpa gaya tarik tambahan (F = 0). Bandingkan dengan nilai θc = arctan(μs) yang dihitung otomatis.</li>
+      <li>Ulangi dengan permukaan dan massa berbeda, catat hasilnya di LKS.</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> penguraian vektor gaya berat pada bidang miring (w∥ = mg sinθ, w⊥ = mg cosθ = N), gaya gesek statis vs kinetis, sudut kritis (θc = arctan μs), dan Hukum II Newton pada gerak sepanjang bidang miring.</li>
+      <li><b>Alur yang disarankan:</b> mulai dari sudut kecil (benda diam) → naikkan sudut perlahan sambil menjelaskan bahwa f statis "menyesuaikan diri" hingga mencapai nilai maksimumnya → tunjukkan momen benda mulai meluncur pada sudut kritis.</li>
+      <li><b>Ekstensi:</b> gunakan Gaya Tarik F untuk mendiskusikan kasus benda ditarik naik melawan gravitasi dan gesekan sekaligus (ΣF = F − w∥ − f).</li>
+      <li>Diagram vektor pada simulasi (warna: ungu = berat, hijau = normal, merah = gesekan, biru = gaya tarik) mengikuti konvensi umum buku teks fisika, dapat dipakai langsung untuk latihan diagram benda bebas (free-body diagram) di papan tulis.</li>
+      <li>LKS pendamping ada di folder <code>worksheet/</code>, panduan lengkap di <code>README.md</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SMA · Topik: Dinamika Gerak pada Bidang Miring, Gaya Gesek Statis &amp; Kinetis.</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const g = 10;
+  const rampLenM = 6;         // panjang bidang miring dalam meter
+  const pxPerM = 62;          // skala px/meter di sepanjang bidang
+  const forceScale = 1.6;     // px per Newton untuk panjang vektor
+
+  const gvCanvas = document.getElementById('graph-v');
+  const gsCanvas = document.getElementById('graph-s');
+  const gvCtx = gvCanvas.getContext('2d');
+  const gsCtx = gsCanvas.getContext('2d');
+
+  let state = {
+    angleDeg: 20, mass: 4, mus: 0.1, muk: 0.08, surface:'licin',
+    forceOn:false, force:0,
+    t:0, s:0, v:0, a:0,
+    N:0, f:0, wPar:0, w:0,
+    running:false, history:[], attempt:0, celebrateTimer:0
+  };
+
+  const angleSlider = document.getElementById('angle-slider');
+  const massSlider = document.getElementById('mass-slider');
+  const forceSlider = document.getElementById('force-slider');
+  const forceToggle = document.getElementById('force-toggle');
+
+  angleSlider.addEventListener('input', ()=>{
+    state.angleDeg = +angleSlider.value;
+    document.getElementById('angle-val').textContent = state.angleDeg+'°';
+    updateCalc(); drawStatic();
+  });
+  massSlider.addEventListener('input', ()=>{
+    state.mass = +massSlider.value;
+    document.getElementById('mass-val').textContent = state.mass+' kg';
+    updateCalc();
+  });
+  forceSlider.addEventListener('input', ()=>{
+    state.force = +forceSlider.value;
+    document.getElementById('force-val').textContent = state.force+' N';
+    updateCalc();
+  });
+  document.getElementById('surface-row').addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn');
+    if(!btn) return;
+    document.querySelectorAll('#surface-row .choice-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.surface = btn.dataset.surface;
+    state.mus = +btn.dataset.mus;
+    state.muk = +btn.dataset.muk;
+    updateCalc();
+  });
+  forceToggle.addEventListener('change', ()=>{
+    state.forceOn = forceToggle.checked;
+    if(!state.running){ startRun(); }
+  });
+  document.getElementById('reset-btn').addEventListener('click', resetAll);
+
+  function updateCalc(){
+    const th = state.angleDeg*Math.PI/180;
+    const w = state.mass*g;
+    const wPar = w*Math.sin(th);
+    const N = w*Math.cos(th);
+    const fsMax = state.mus*N;
+    const fk = state.muk*N;
+    const thetaC = Math.atan(state.mus)*180/Math.PI;
+    document.getElementById('calc-box').innerHTML =
+      `w = mg = <b class="mono">${w.toFixed(1)} N</b> · w∥ = mg sinθ = <b class="mono">${wPar.toFixed(1)} N</b> · N = mg cosθ = <b class="mono">${N.toFixed(1)} N</b><br>` +
+      `f statis maksimum = μs·N = <b class="mono">${fsMax.toFixed(1)} N</b> · f kinetis = μk·N = <b class="mono">${fk.toFixed(1)} N</b><br>` +
+      `Sudut kritis (θc = arctan μs) = <b class="mono">${thetaC.toFixed(1)}°</b>`;
+
+    // live celebration check when at rest, force off
+    const cel = document.getElementById('celebrate');
+    if(!state.forceOn && Math.abs(state.angleDeg - thetaC) <= 1.2){
+      cel.style.display='block';
+    } else {
+      cel.style.display='none';
+    }
+  }
+
+  function startRun(){
+    state.running = true;
+    requestAnimationFrame(loop);
+  }
+  function resetAll(){
+    state.t=0; state.s=0; state.v=0; state.a=0; state.running=false;
+    state.forceOn=false; state.force=0; state.history=[];
+    forceToggle.checked=false; forceSlider.value=0;
+    document.getElementById('force-val').textContent='0 N';
+    updateHud(); updateCalc(); drawStatic(); drawGraphs();
+  }
+
+  let lastT=null;
+  function loop(t){
+    if(!state.running) return;
+    if(lastT===null) lastT=t;
+    const dt = Math.min((t-lastT)/1000, 0.05);
+    lastT=t;
+
+    const th = state.angleDeg*Math.PI/180;
+    const w = state.mass*g;
+    const wPar = w*Math.sin(th);
+    const N = w*Math.cos(th);
+    const fsMax = state.mus*N;
+    const fk = state.muk*N;
+    const Fapp = state.forceOn ? state.force : 0;
+    const netDriving = wPar - Fapp; // positive = tends to slide down
+
+    let a, fShown, status;
+    if(Math.abs(state.v) < 0.0008){
+      if(Math.abs(netDriving) <= fsMax){
+        a = 0; fShown = -netDriving; status = "Diam (gaya statis seimbang)";
+        state.v = 0;
+      } else {
+        const dir = Math.sign(netDriving);
+        const netForce = netDriving - dir*fk;
+        a = netForce/state.mass;
+        fShown = -dir*fk;
+        status = dir>0 ? "Mulai meluncur turun" : "Bergerak naik (ditarik F)";
+      }
+    } else {
+      const dir = Math.sign(state.v);
+      const netForce = netDriving - dir*fk;
+      a = netForce/state.mass;
+      fShown = -dir*fk;
+      status = dir>0 ? "Meluncur turun" : "Bergerak naik";
+      const newV = state.v + a*dt;
+      if(newV*state.v < 0) state.v = 0; else state.v = newV;
+    }
+    if(Math.abs(state.v) >= 0.0008){
+      state.s += state.v*dt;
+    }
+    state.s = Math.max(0, Math.min(rampLenM, state.s));
+    state.a = a; state.N = N; state.f = fShown; state.wPar = wPar; state.w = w;
+    state.t += dt;
+    document.getElementById('hud-status').textContent = status;
+
+    if(state.history.length===0 || state.t - state.history[state.history.length-1].t > 0.08){
+      state.history.push({t:state.t, v:state.v, s:state.s});
+      if(state.history.length>250) state.history.shift();
+    }
+
+    updateHud(); drawScene(); drawGraphs();
+
+    const stoppedAtEnd = (state.s<=0 || state.s>=rampLenM) && Math.abs(state.v) < 0.01;
+    const atRestBalanced = Math.abs(state.v) < 0.0008 && a===0;
+    if(stoppedAtEnd || (atRestBalanced && state.t>0.3)){
+      state.running = false;
+      logAttempt();
+      return;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function logAttempt(){
+    state.attempt++;
+    const tbody = document.getElementById('history-body');
+    const empty = tbody.querySelector('.empty-row');
+    if(empty) empty.remove();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${state.attempt}</td><td>${state.angleDeg}</td><td>${state.mass}</td><td>${state.surface}</td><td>${state.forceOn?state.force:0}</td><td>${state.a.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  function updateHud(){
+    document.getElementById('hud-theta').textContent = state.angleDeg+'°';
+    document.getElementById('hud-s').textContent = state.s.toFixed(2)+' m';
+    document.getElementById('hud-v').textContent = state.v.toFixed(2)+' m/s';
+    document.getElementById('hud-a').textContent = state.a.toFixed(2)+' m/s²';
+  }
+
+  // ---------- DRAWING ----------
+  function rampPoints(){
+    const th = state.angleDeg*Math.PI/180;
+    const bottom = { x: 700, y: 330 };
+    const rampPx = rampLenM*pxPerM;
+    const top = { x: bottom.x - rampPx*Math.cos(th), y: bottom.y - rampPx*Math.sin(th) };
+    return {top, bottom, th};
+  }
+
+  function drawScene(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#fbfbfd'; ctx.fillRect(0,0,W,H);
+
+    const {top, bottom, th} = rampPoints();
+    // ground
+    ctx.strokeStyle = '#c7ccdc'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(60, bottom.y); ctx.lineTo(840, bottom.y); ctx.stroke();
+    // wedge fill
+    ctx.beginPath();
+    ctx.moveTo(top.x, top.y); ctx.lineTo(bottom.x, bottom.y); ctx.lineTo(top.x, bottom.y); ctx.closePath();
+    ctx.fillStyle = '#e7e9f2'; ctx.fill();
+    ctx.strokeStyle = '#a9b0c9'; ctx.lineWidth = 1.5; ctx.stroke();
+    // ramp surface
+    ctx.strokeStyle = '#5b6178'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(bottom.x, bottom.y); ctx.stroke();
+    // angle arc + label
+    ctx.strokeStyle = '#b8912c'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(bottom.x, bottom.y, 40, Math.PI, Math.PI+th, false); ctx.stroke();
+    ctx.fillStyle = '#8a6a10'; ctx.font = '12px IBM Plex Mono';
+    ctx.fillText('θ='+state.angleDeg+'°', bottom.x-70, bottom.y-10);
+
+    // block position
+    const s = state.s;
+    const px = top.x + (bottom.x-top.x)*(s/rampLenM);
+    const py = top.y + (bottom.y-top.y)*(s/rampLenM);
+    const normal = { x: Math.sin(th), y: -Math.cos(th) };
+    const dirDown = { x: Math.cos(th), y: Math.sin(th) };
+    const blockSize = 22 + state.mass*2.2;
+    const cx = px + normal.x*(blockSize/2);
+    const cy = py + normal.y*(blockSize/2);
+
+    // block
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(th);
+    ctx.fillStyle = '#3a5fd9';
+    ctx.strokeStyle = '#1f3d9e';
+    ctx.lineWidth = 2;
+    ctx.fillRect(-blockSize/2, -blockSize/2, blockSize, blockSize);
+    ctx.strokeRect(-blockSize/2, -blockSize/2, blockSize, blockSize);
+    ctx.fillStyle = '#dfe6ff';
+    ctx.font = 'bold 11px IBM Plex Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.mass+'kg', 0, 4);
+    ctx.restore();
+
+    // vectors from block center
+    drawVec(cx, cy, 0, state.w*forceScale*0.36, 'w', '#7c5cff');           // weight straight down
+    drawVec(cx, cy, normal.x*state.N*forceScale*0.36, normal.y*state.N*forceScale*0.36, 'N', '#1f9d63'); // normal
+    const fDir = state.f>=0 ? dirDown : {x:-dirDown.x,y:-dirDown.y};
+    drawVec(cx, cy, fDir.x*Math.abs(state.f)*forceScale*0.36, fDir.y*Math.abs(state.f)*forceScale*0.36, 'f', '#e2493d'); // friction
+    if(state.forceOn && state.force>0){
+      drawVec(cx, cy, -dirDown.x*state.force*forceScale*0.36, -dirDown.y*state.force*forceScale*0.36, 'F', '#2f6fed'); // applied up-incline
+    }
+  }
+
+  function drawVec(x,y,dx,dy,label,color){
+    if(Math.abs(dx)<0.5 && Math.abs(dy)<0.5) return;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx,y+dy); ctx.stroke();
+    const ang = Math.atan2(dy,dx);
+    ctx.beginPath();
+    ctx.moveTo(x+dx, y+dy);
+    ctx.lineTo(x+dx-9*Math.cos(ang-0.4), y+dy-9*Math.sin(ang-0.4));
+    ctx.lineTo(x+dx-9*Math.cos(ang+0.4), y+dy-9*Math.sin(ang+0.4));
+    ctx.closePath(); ctx.fill();
+    ctx.font = 'bold 12px IBM Plex Mono';
+    ctx.fillText(label, x+dx+6, y+dy+4);
+  }
+
+  function drawStatic(){ drawScene(); }
+
+  function drawGraphs(){
+    plotGraph(gvCtx, gvCanvas, state.history.map(p=>[p.t,p.v]), '#2f6fed');
+    plotGraph(gsCtx, gsCanvas, state.history.map(p=>[p.t,p.s]), '#1f9d63');
+  }
+  function plotGraph(c, cv, points, color){
+    const w = cv.width, h = cv.height;
+    c.clearRect(0,0,w,h);
+    c.strokeStyle = '#e3e6f7'; c.lineWidth = 1;
+    for(let i=0;i<=4;i++){ const y=h-(i/4)*(h-14)-7; c.beginPath(); c.moveTo(26,y); c.lineTo(w-6,y); c.stroke(); }
+    if(points.length<2) return;
+    const tMax = Math.max(points[points.length-1][0], 5);
+    const tMin = Math.max(0, tMax-12);
+    const visible = points.filter(p=>p[0]>=tMin);
+    const vals = visible.map(p=>p[1]);
+    const yMax = Math.max(0.5, ...vals.map(Math.abs))*1.2;
+    const yMin = Math.min(0, ...vals)*1.2;
+    c.strokeStyle = color; c.lineWidth = 2.2; c.beginPath();
+    visible.forEach((p,i)=>{
+      const px = 26 + ((p[0]-tMin)/(tMax-tMin||1))*(w-32);
+      const py = h-7 - ((p[1]-yMin)/((yMax-yMin)||1))*(h-14);
+      if(i===0) c.moveTo(px,py); else c.lineTo(px,py);
+    });
+    c.stroke();
+    c.fillStyle = '#8a8fae'; c.font = '9px IBM Plex Mono';
+    c.fillText(yMax.toFixed(1), 1, 11);
+  }
+
+  updateCalc();
+  updateHud();
+  drawStatic();
+  drawGraphs();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ayo Dorong! Simulasi Gerak & Gaya - SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#7fc4ff;
+    --sky-bottom:#e9f8ff;
+    --grass:#7dc242;
+    --grass-dark:#5a9c2c;
+    --asphalt:#454a63;
+    --asphalt-line:#ffd23f;
+    --ice:#d7f3ff;
+    --coral:#ff6b6b;
+    --coral-dark:#e14f4f;
+    --sun:#ffd23f;
+    --ink:#2b2d42;
+    --card:#ffffff;
+    --panel:#fff8ec;
+    --wood:#c98a4b;
+    --wood-dark:#93602c;
+    --radius:22px;
+    --shadow: 0 10px 24px rgba(43,45,66,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Nunito', sans-serif;
+    background: linear-gradient(180deg, #cdeaff 0%, #f4fbff 40%);
+    color:var(--ink);
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  h1,h2,h3, .display{
+    font-family:'Baloo 2', sans-serif;
+  }
+  a{color:var(--coral-dark);}
+
+  /* HEADER */
+  header.top{
+    max-width:1100px;
+    margin:0 auto;
+    padding:22px 20px 10px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{
+    width:48px;height:48px;border-radius:14px;
+    background:linear-gradient(160deg, var(--coral), #ff9b6b);
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px; box-shadow:var(--shadow);
+  }
+  .brand h1{font-size:22px;margin:0;line-height:1.1;}
+  .brand p{margin:2px 0 0;font-size:13px;color:#5b5f7a;font-weight:700;}
+
+  .level-track{display:flex;gap:8px;align-items:center;}
+  .level-pill{
+    font-family:'Baloo 2';
+    font-size:13px;
+    padding:7px 14px;
+    border-radius:999px;
+    font-weight:700;
+    border:2px solid transparent;
+  }
+  .level-pill.active{background:var(--coral);color:#fff;box-shadow:0 4px 10px rgba(255,107,107,.4);}
+  .level-pill.linked{background:#fff;color:#5b5f7a;border-color:#e3e6f5;text-decoration:none;cursor:pointer;}
+  .level-pill.linked:hover{border-color:var(--coral);color:var(--coral-dark);}
+  .breadcrumb{max-width:1100px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096b3;}
+  .breadcrumb a{color:#5b5f7a;text-decoration:none;}
+  .breadcrumb a:hover{color:var(--coral);text-decoration:underline;}
+
+  main{max-width:1100px;margin:0 auto;padding:10px 20px;}
+
+  .layout{
+    display:grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap:20px;
+    align-items:start;
+  }
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  /* SCENE CARD */
+  .scene-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px;
+  }
+  .scene-wrap{
+    position:relative;
+    border-radius:16px;
+    overflow:hidden;
+    background:var(--sky-bottom);
+  }
+  canvas{display:block;width:100%;height:auto;}
+
+  .scoreboard{
+    position:absolute;
+    top:10px; left:10px;
+    display:flex; gap:8px;
+    flex-wrap:wrap;
+  }
+  .plank{
+    background:var(--wood);
+    border:3px solid var(--wood-dark);
+    border-radius:10px;
+    padding:6px 12px;
+    color:#fff8ec;
+    font-family:'Baloo 2';
+    text-align:center;
+    box-shadow:0 4px 0 var(--wood-dark);
+    min-width:88px;
+  }
+  .plank .label{font-size:10px;letter-spacing:.5px;opacity:.85;}
+  .plank .value{font-size:20px;line-height:1.1;}
+
+  .speech-bubble{
+    margin-top:12px;
+    background:var(--panel);
+    border:3px solid #ffe3ad;
+    border-radius:18px;
+    padding:12px 16px;
+    font-weight:700;
+    font-size:15px;
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    min-height:26px;
+  }
+  .speech-bubble .mascot-face{font-size:26px;}
+  #tip-text{transition:opacity .25s ease;}
+
+  /* CONTROLS */
+  .panel{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:18px;
+    margin-bottom:18px;
+  }
+  .panel h3{margin:0 0 10px;font-size:17px;}
+  .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .choice-btn{
+    flex:1 1 auto;
+    min-width:88px;
+    border:3px solid #e7e9f5;
+    background:#fbfbff;
+    border-radius:14px;
+    padding:10px 8px;
+    font-family:'Nunito';
+    font-weight:800;
+    font-size:13px;
+    color:var(--ink);
+    cursor:pointer;
+    text-align:center;
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+  }
+  .choice-btn .emoji{display:block;font-size:22px;margin-bottom:2px;}
+  .choice-btn:hover{transform:translateY(-2px);}
+  .choice-btn.selected{
+    border-color:var(--coral);
+    background:#fff0ee;
+    color:var(--coral-dark);
+  }
+
+  .big-action{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(160deg, var(--coral), #ff8a5c);
+    color:#fff;
+    font-family:'Baloo 2';
+    font-size:20px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 6px 0 var(--coral-dark);
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .big-action:active{transform:translateY(4px);box-shadow:0 2px 0 var(--coral-dark);}
+  .big-action:disabled{opacity:.55;cursor:not-allowed;}
+
+  .reset-btn{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border-radius:12px;
+    border:2px solid #e3e6f5;
+    background:#fff;
+    font-family:'Nunito';
+    font-weight:800;
+    color:#5b5f7a;
+    cursor:pointer;
+  }
+
+  .stat-row{display:flex;gap:10px;margin-top:14px;}
+  .stat{
+    flex:1;
+    background:var(--panel);
+    border-radius:12px;
+    padding:8px 10px;
+    text-align:center;
+  }
+  .stat .n{font-family:'Baloo 2';font-size:19px;}
+  .stat .l{font-size:11px;font-weight:800;color:#8a8fae;}
+
+  table.history{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}
+  table.history th, table.history td{padding:6px 6px;text-align:center;border-bottom:1px solid #eef0fa;}
+  table.history th{color:#8a8fae;font-size:11px;text-transform:uppercase;}
+  table.history tbody tr:last-child td{font-weight:800;color:var(--coral-dark);}
+  .empty-row td{color:#b7bad2;font-style:italic;padding:14px 0;}
+
+  /* CHALLENGE */
+  .challenge{
+    background:linear-gradient(160deg,#fff6e0,#ffe9c9);
+    border:3px dashed var(--sun);
+    border-radius:16px;
+    padding:12px 14px;
+    font-weight:800;
+    font-size:14px;
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .challenge .num{
+    font-family:'Baloo 2';font-size:22px;color:var(--coral-dark);
+  }
+  #celebrate{
+    display:none;
+    margin-top:8px;
+    font-family:'Baloo 2';
+    color:#3a9c3a;
+    font-size:15px;
+  }
+
+  /* INSTRUCTIONS ACCORDION */
+  details.help{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:14px 18px;
+    margin-top:18px;
+  }
+  details.help + details.help{margin-top:12px;}
+  details.help summary{
+    font-family:'Baloo 2';
+    font-size:17px;
+    cursor:pointer;
+    list-style:none;
+  }
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--coral);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol, details.help ul{padding-left:20px;line-height:1.7;}
+
+  footer{
+    max-width:1100px;margin:26px auto 0;padding:0 20px;
+    font-size:12px;color:#8a8fae;text-align:center;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .big-action, .choice-btn{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Gerak &amp; Gaya</a> › <b>SD</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🚗</div>
+    <div>
+      <h1>Ayo Dorong!</h1>
+      <p>Simulasi Gerak &amp; Gaya — Seri 1 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <span class="level-pill active">SD</span>
+    <a class="level-pill linked" href="../smp/index.html">SMP →</a>
+    <a class="level-pill linked" href="../sma/index.html">SMA →</a>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <!-- SCENE -->
+    <div class="scene-card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="420"></canvas>
+        <div class="scoreboard">
+          <div class="plank">
+            <div class="label">JARAK</div>
+            <div class="value"><span id="hud-distance">0.0</span> m</div>
+          </div>
+          <div class="plank">
+            <div class="label">KECEPATAN</div>
+            <div class="value"><span id="hud-speed">0.0</span> m/s</div>
+          </div>
+        </div>
+      </div>
+      <div class="speech-bubble">
+        <span class="mascot-face">🙂</span>
+        <span id="tip-text">Halo! Aku Kak Dorong. Pilih permukaan jalan dan kekuatan dorongan, lalu tekan tombol DORONG!</span>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div>
+      <div class="panel">
+        <h3>1️⃣ Pilih Permukaan Jalan</h3>
+        <div class="choice-row" id="surface-row">
+          <button class="choice-btn selected" data-surface="ice"><span class="emoji">🧊</span>Es Licin</button>
+          <button class="choice-btn" data-surface="asphalt"><span class="emoji">🛣️</span>Jalan Aspal</button>
+          <button class="choice-btn" data-surface="grass"><span class="emoji">🌱</span>Rumput</button>
+        </div>
+
+        <h3>2️⃣ Pilih Kekuatan Dorongan</h3>
+        <div class="choice-row" id="power-row">
+          <button class="choice-btn" data-power="soft"><span class="emoji">🤏</span>Pelan</button>
+          <button class="choice-btn selected" data-power="medium"><span class="emoji">✊</span>Sedang</button>
+          <button class="choice-btn" data-power="hard"><span class="emoji">💪</span>Kuat</button>
+        </div>
+
+        <button class="big-action" id="push-btn">DORONG MOBILNYA! 🚀</button>
+        <button class="reset-btn" id="reset-btn">↺ Ulangi dari Awal</button>
+
+        <div class="challenge">
+          <span>🎯</span>
+          <span>Tantangan: buat mobil berhenti dekat <span class="num" id="target-m">8</span> meter!</span>
+        </div>
+        <div id="celebrate">🎉 Hore! Kamu berhasil menyelesaikan tantangannya!</div>
+      </div>
+
+      <div class="panel">
+        <h3>📒 Catatan Percobaan</h3>
+        <table class="history">
+          <thead>
+            <tr><th>No</th><th>Permukaan</th><th>Dorongan</th><th>Jarak</th></tr>
+          </thead>
+          <tbody id="history-body">
+            <tr class="empty-row"><td colspan="4">Belum ada percobaan. Ayo coba dorong mobilnya!</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Pilih <b>permukaan jalan</b>: es, aspal, atau rumput.</li>
+      <li>Pilih <b>kekuatan dorongan</b>: pelan, sedang, atau kuat.</li>
+      <li>Tekan tombol <b>DORONG MOBILNYA!</b> dan amati apa yang terjadi.</li>
+      <li>Lihat berapa <b>jarak</b> yang ditempuh mobil sebelum berhenti.</li>
+      <li>Coba ganti permukaan jalan dengan dorongan yang sama. Permukaan mana yang membuat mobil berhenti paling cepat? Kenapa?</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru / Orang Tua</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> gerak benda, gaya dorong, dan gaya gesek (tanpa rumus matematis — cukup pengamatan).</li>
+      <li><b>Cara pakai di kelas:</b> ajak siswa memprediksi dulu ("menurutmu mobil akan berhenti lebih cepat di rumput atau di es?") sebelum mencoba, lalu bandingkan dengan hasil simulasi.</li>
+      <li><b>Ide diskusi:</b> hubungkan dengan pengalaman sehari-hari, misalnya mengapa sepeda lebih sulit dikayuh di rumput daripada di jalan aspal.</li>
+      <li>Lembar Kerja Siswa (LKS) yang menyertai simulasi ini tersedia di folder <code>worksheet/</code> pada repository, dan panduan lengkap ada di file <code>README.md</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>
+  Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SD · Topik: Gerak &amp; Gaya · Dibuat untuk pembelajaran sekolah.
+</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const groundY = H*0.74;
+  const meterToPx = 42;
+
+  const surfaces = {
+    ice:      { friction: 0.06, color1:'#eaf9ff', color2:'#d2f0ff', label:'Es Licin' },
+    asphalt:  { friction: 0.32, color1:'#5a5f7c', color2:'#454a63', label:'Jalan Aspal' },
+    grass:    { friction: 0.75, color1:'#8bd155', color2:'#6fb63c', label:'Rumput' }
+  };
+  const powers = {
+    soft:   { v0: 3.2, label:'Pelan' },
+    medium: { v0: 6.2, label:'Sedang' },
+    hard:   { v0: 9.5, label:'Kuat' }
+  };
+
+  let state = {
+    surface: 'ice',
+    power: 'medium',
+    running: false,
+    xMeters: 0,
+    vMeters: 0,
+    maxV: 0,
+    finished:false,
+    attempt: 0
+  };
+
+  let targetM = Math.floor(4 + Math.random()*8);
+  document.getElementById('target-m').textContent = targetM;
+
+  const tips = {
+    ice: "Wuss! Di atas es, gesekannya sangat kecil jadi mobil meluncur jauh sekali!",
+    asphalt: "Di jalan aspal, gesekannya sedang-sedang saja, mobil berhenti tidak terlalu cepat.",
+    grass: "Di atas rumput, gesekannya besar sehingga mobil cepat berhenti!"
+  };
+
+  function setActive(row, attr, value){
+    document.querySelectorAll('#'+row+' .choice-btn').forEach(b=>{
+      b.classList.toggle('selected', b.dataset[attr]===value);
+    });
+  }
+
+  document.getElementById('surface-row').addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn');
+    if(!btn || state.running) return;
+    state.surface = btn.dataset.surface;
+    setActive('surface-row','surface',state.surface);
+    draw();
+  });
+  document.getElementById('power-row').addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn');
+    if(!btn || state.running) return;
+    state.power = btn.dataset.power;
+    setActive('power-row','power',state.power);
+  });
+
+  document.getElementById('push-btn').addEventListener('click', startRun);
+  document.getElementById('reset-btn').addEventListener('click', resetAll);
+
+  function startRun(){
+    if(state.running) return;
+    state.running = true;
+    state.finished = false;
+    state.xMeters = 0;
+    state.vMeters = powers[state.power].v0;
+    state.maxV = state.vMeters;
+    document.getElementById('celebrate').style.display='none';
+    document.getElementById('push-btn').disabled = true;
+    setTip("Meluncur... ayo lihat sampai mana mobilnya bisa jalan!", "😀");
+    requestAnimationFrame(loop);
+  }
+
+  function resetAll(){
+    state.running=false;
+    state.finished=false;
+    state.xMeters=0;
+    state.vMeters=0;
+    document.getElementById('push-btn').disabled=false;
+    document.getElementById('celebrate').style.display='none';
+    setTip("Siap mencoba lagi? Pilih permukaan dan kekuatan dorongan, lalu tekan DORONG!", "🙂");
+    updateHud();
+    draw();
+  }
+
+  function setTip(text, face){
+    document.getElementById('tip-text').textContent = text;
+    document.querySelector('.mascot-face').textContent = face || '🙂';
+  }
+
+  let lastT = null;
+  function loop(t){
+    if(!state.running) return;
+    if(lastT===null) lastT = t;
+    const dt = Math.min((t-lastT)/1000, 0.05);
+    lastT = t;
+
+    const g = 10; // m/s^2
+    const mu = surfaces[state.surface].friction;
+    const decel = mu*g;
+
+    state.vMeters = Math.max(0, state.vMeters - decel*dt);
+    state.xMeters += state.vMeters*dt;
+    state.maxV = Math.max(state.maxV, state.vMeters);
+
+    updateHud();
+    draw();
+
+    if(state.vMeters<=0.001){
+      finishRun();
+      return;
+    }
+    lastT = t;
+    requestAnimationFrame(loop);
+  }
+
+  function finishRun(){
+    state.running = false;
+    state.finished = true;
+    document.getElementById('push-btn').disabled = false;
+    setTip(tips[state.surface], "😮");
+    addHistory();
+    checkChallenge();
+  }
+
+  function addHistory(){
+    state.attempt++;
+    const tbody = document.getElementById('history-body');
+    const emptyRow = tbody.querySelector('.empty-row');
+    if(emptyRow) emptyRow.remove();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${state.attempt}</td><td>${surfaces[state.surface].label}</td><td>${powers[state.power].label}</td><td>${state.xMeters.toFixed(1)} m</td>`;
+    tbody.appendChild(tr);
+  }
+
+  function checkChallenge(){
+    if(Math.abs(state.xMeters - targetM) <= 0.6){
+      const c = document.getElementById('celebrate');
+      c.style.display='block';
+    }
+  }
+
+  function updateHud(){
+    document.getElementById('hud-distance').textContent = state.xMeters.toFixed(1);
+    document.getElementById('hud-speed').textContent = state.vMeters.toFixed(1);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // sky
+    const skyGrad = ctx.createLinearGradient(0,0,0,groundY);
+    skyGrad.addColorStop(0,'#7fc4ff');
+    skyGrad.addColorStop(1,'#e9f8ff');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0,0,W,groundY);
+
+    // sun
+    ctx.fillStyle = '#ffd23f';
+    ctx.beginPath();
+    ctx.arc(W-70,60,32,0,Math.PI*2);
+    ctx.fill();
+
+    // clouds
+    drawCloud(120,70);
+    drawCloud(300,50);
+    drawCloud(560,90);
+
+    const surf = surfaces[state.surface];
+    const camX = Math.max(0, state.xMeters*meterToPx - W*0.35);
+
+    // ground
+    ctx.fillStyle = surf.color1;
+    ctx.fillRect(0,groundY,W,H-groundY);
+
+    // ground detail (tiled, parallax with camera)
+    ctx.save();
+    ctx.translate(-camX % 60, 0);
+    if(state.surface==='asphalt'){
+      ctx.strokeStyle = '#ffd23f';
+      ctx.lineWidth = 5;
+      ctx.setLineDash([26,20]);
+      ctx.beginPath();
+      ctx.moveTo(-60, groundY+34);
+      ctx.lineTo(W+60, groundY+34);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else if(state.surface==='grass'){
+      ctx.fillStyle = '#5a9c2c';
+      for(let x=-60;x<W+60;x+=26){
+        ctx.beginPath();
+        ctx.moveTo(x, groundY+18);
+        ctx.lineTo(x+5, groundY+4);
+        ctx.lineTo(x+10, groundY+18);
+        ctx.fill();
+      }
+    } else if(state.surface==='ice'){
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      for(let x=-60;x<W+60;x+=70){
+        ctx.beginPath();
+        ctx.arc(x, groundY+26, 3, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+
+    // distance ruler
+    ctx.strokeStyle = '#00000022';
+    ctx.fillStyle = '#00000055';
+    ctx.font = "12px Nunito";
+    ctx.lineWidth = 2;
+    const startMeter = Math.floor(camX/meterToPx/1) - 1;
+    for(let m=startMeter; m<startMeter+ (W/meterToPx)+2; m++){
+      if(m<0) continue;
+      const x = m*meterToPx - camX;
+      ctx.beginPath();
+      ctx.moveTo(x, groundY);
+      ctx.lineTo(x, groundY+8);
+      ctx.stroke();
+      if(m%2===0) ctx.fillText(m+"m", x-8, groundY+22);
+    }
+
+    // target flag
+    const targetX = targetM*meterToPx - camX;
+    if(targetX > -20 && targetX < W+20){
+      ctx.strokeStyle = '#e14f4f';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(targetX, groundY);
+      ctx.lineTo(targetX, groundY-46);
+      ctx.stroke();
+      ctx.fillStyle = '#ff6b6b';
+      ctx.beginPath();
+      ctx.moveTo(targetX, groundY-46);
+      ctx.lineTo(targetX+22, groundY-38);
+      ctx.lineTo(targetX, groundY-30);
+      ctx.fill();
+    }
+
+    // car
+    const carXpx = state.xMeters*meterToPx - camX + 60;
+    drawCar(carXpx, groundY, state.vMeters);
+  }
+
+  function drawCloud(x,y){
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath();
+    ctx.arc(x,y,16,0,Math.PI*2);
+    ctx.arc(x+18,y+6,20,0,Math.PI*2);
+    ctx.arc(x+38,y,15,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  let wheelAngle = 0;
+  function drawCar(x, groundY, speed){
+    wheelAngle += speed*0.15;
+    const bodyW = 84, bodyH = 34;
+    const y = groundY - 24;
+
+    ctx.save();
+    ctx.translate(x,y);
+
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.beginPath();
+    ctx.ellipse(0, 26, 48, 8, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // body
+    ctx.fillStyle = '#ff6b6b';
+    roundRect(-bodyW/2, -bodyH, bodyW, bodyH, 12);
+    ctx.fill();
+
+    // cabin
+    ctx.fillStyle = '#ffe3dd';
+    roundRect(-bodyW/2+14, -bodyH-16, bodyW-42, 20, 8);
+    ctx.fill();
+
+    // eyes
+    ctx.fillStyle = '#2b2d42';
+    ctx.beginPath();
+    ctx.arc(-bodyW/2+22, -bodyH-6, 3.5, 0, Math.PI*2);
+    ctx.arc(-bodyW/2+40, -bodyH-6, 3.5, 0, Math.PI*2);
+    ctx.fill();
+
+    // wheels
+    drawWheel(-bodyW/2+16, 4, wheelAngle);
+    drawWheel(bodyW/2-16, 4, wheelAngle);
+
+    ctx.restore();
+  }
+
+  function drawWheel(cx,cy,angle){
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(angle);
+    ctx.fillStyle = '#2b2d42';
+    ctx.beginPath();
+    ctx.arc(0,0,13,0,Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#7d8199';
+    ctx.lineWidth = 2;
+    for(let i=0;i<4;i++){
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.lineTo(Math.cos(i*Math.PI/2)*11, Math.sin(i*Math.PI/2)*11);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  // initial paint
+  draw();
+
+  // responsive resize (keep internal resolution fixed, scale via CSS width:100%)
+})();
+</script>
+</body>
+</html>

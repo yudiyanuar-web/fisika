@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Gerak & Gaya - SMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1fb;
+    --grid-line:#dde2f5;
+    --primary:#2f5fe0;
+    --primary-dark:#1d3fb0;
+    --accent:#f5a524;
+    --danger:#e0473b;
+    --ink:#111a3c;
+    --muted:#616a92;
+    --card:#ffffff;
+    --panel:#f5f7ff;
+    --console-bg:#0f1730;
+    --console-text:#7ef7c5;
+    --console-text-dim:#5b7fd8;
+    --radius:18px;
+    --shadow:0 10px 26px rgba(23,32,80,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter', sans-serif;
+    background:
+      linear-gradient(var(--bg), var(--bg));
+    background-color:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  h1,h2,h3,.display{ font-family:'Space Grotesk', sans-serif; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  header.top{
+    max-width:1150px;margin:0 auto;padding:22px 20px 8px;
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{
+    width:48px;height:48px;border-radius:12px;
+    background:linear-gradient(160deg, var(--primary), #5b8bff);
+    display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;
+    box-shadow:var(--shadow);
+  }
+  .brand h1{font-size:21px;margin:0;line-height:1.15;}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:700;letter-spacing:.2px;}
+
+  .level-track{display:flex;gap:8px;}
+  .level-pill{font-family:'Space Grotesk';font-size:13px;padding:7px 14px;border-radius:999px;font-weight:700;border:2px solid transparent;}
+  .level-pill.done{background:#e7f7ee;color:#1c8a52;border-color:#bfe9d3;text-decoration:none;cursor:pointer;}
+  .level-pill.done:hover{border-color:#1c8a52;}
+  .level-pill.active{background:var(--primary);color:#fff;box-shadow:0 4px 10px rgba(47,95,224,.35);}
+  .level-pill.linked{background:#fff;color:#9aa0c0;border-color:#e3e6f5;text-decoration:none;cursor:pointer;}
+  .level-pill.linked:hover{border-color:var(--primary);color:var(--primary-dark);}
+  .breadcrumb{max-width:1150px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096b3;}
+  .breadcrumb a{color:#616a92;text-decoration:none;}
+  .breadcrumb a:hover{color:var(--primary);text-decoration:underline;}
+
+  main{max-width:1150px;margin:0 auto;padding:8px 20px;}
+  .layout{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:900px){ .layout{grid-template-columns:1fr;} }
+
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+
+  /* SCENE */
+  .scene-wrap{position:relative;border-radius:14px;overflow:hidden;background:#f7f9ff;border:1px solid var(--grid-line);}
+  canvas#scene{display:block;width:100%;height:auto;}
+
+  .console{
+    display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;
+    background:var(--console-bg);border-radius:14px;padding:12px 14px;
+  }
+  .console .readout{flex:1;min-width:110px;}
+  .console .readout .l{font-size:10.5px;color:var(--console-text-dim);letter-spacing:.5px;text-transform:uppercase;font-weight:700;}
+  .console .readout .v{font-size:19px;color:var(--console-text);font-weight:700;}
+
+  .graphs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  .graph-card{background:var(--panel);border-radius:12px;padding:10px 10px 4px;}
+  .graph-card h4{margin:0 0 4px 2px;font-size:12px;color:var(--muted);font-weight:700;}
+  canvas.graph{display:block;width:100%;height:110px;}
+  @media (max-width:560px){ .graphs{grid-template-columns:1fr;} }
+
+  /* CONTROLS */
+  .card h3{margin:0 0 10px;font-size:16px;}
+  .field{margin-bottom:16px;}
+  .field .row-label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;}
+  .field .row-label span.val{color:var(--primary);font-family:'JetBrains Mono';}
+  input[type=range]{width:100%;accent-color:var(--primary);}
+
+  .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  .choice-btn{
+    flex:1 1 auto;min-width:90px;border:2px solid var(--grid-line);background:#fbfcff;
+    border-radius:12px;padding:9px 6px;font-family:'Inter';font-weight:700;font-size:12.5px;
+    color:var(--ink);cursor:pointer;text-align:center;
+  }
+  .choice-btn small{display:block;color:var(--muted);font-weight:600;font-family:'JetBrains Mono';font-size:11px;margin-top:2px;}
+  .choice-btn.selected{border-color:var(--primary);background:#eaf0ff;color:var(--primary-dark);}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--panel);padding:12px 14px;border-radius:12px;margin:14px 0;}
+  .toggle-row .lbl{font-weight:800;font-size:14px;}
+  .switch{position:relative;width:52px;height:28px;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider-toggle{position:absolute;cursor:pointer;inset:0;background:#c9cfe8;border-radius:999px;transition:.2s;}
+  .slider-toggle::before{content:"";position:absolute;height:22px;width:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+  input:checked + .slider-toggle{background:var(--primary);}
+  input:checked + .slider-toggle::before{transform:translateX(24px);}
+
+  .reset-btn{
+    width:100%;padding:10px;border-radius:12px;border:2px solid var(--grid-line);background:#fff;
+    font-family:'Inter';font-weight:800;color:var(--muted);cursor:pointer;
+  }
+
+  .note{
+    background:#fff7e8;border:1px solid #ffe1a8;border-radius:12px;padding:10px 12px;
+    font-size:13px;font-weight:600;color:#8a5a00;margin-top:12px;
+  }
+  #celebrate{display:none;margin-top:10px;background:#e7f7ee;border:1px solid #bfe9d3;color:#1c8a52;
+    border-radius:12px;padding:10px 12px;font-weight:800;font-size:13.5px;}
+
+  .calc-box{background:var(--panel);border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13.5px;line-height:1.9;}
+  .calc-box .mono{color:var(--primary-dark);}
+
+  table.history{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;}
+  table.history th,table.history td{padding:6px;text-align:center;border-bottom:1px solid #eef0fa;}
+  table.history th{color:var(--muted);font-size:10.5px;text-transform:uppercase;}
+  .empty-row td{color:#b7bad2;font-style:italic;padding:14px 0;}
+
+  details.help{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-top:18px;}
+  details.help + details.help{margin-top:12px;}
+  details.help summary{font-family:'Space Grotesk';font-size:16px;cursor:pointer;list-style:none;}
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--primary);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol,details.help ul{padding-left:20px;line-height:1.75;}
+
+  footer{max-width:1150px;margin:26px auto 0;padding:0 20px;font-size:12px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Gerak &amp; Gaya</a> › <b>SMP</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">📐</div>
+    <div>
+      <h1>Lab Gerak & Gaya</h1>
+      <p>Simulasi Fisika Interaktif — Seri 2 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <a class="level-pill done" href="../sd/index.html">← SD</a>
+    <span class="level-pill active">SMP</span>
+    <a class="level-pill linked" href="../sma/index.html">SMA →</a>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <!-- SCENE -->
+    <div class="card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="360"></canvas>
+      </div>
+
+      <div class="console">
+        <div class="readout"><div class="l">Waktu</div><div class="v mono" id="hud-t">0.0 s</div></div>
+        <div class="readout"><div class="l">Posisi</div><div class="v mono" id="hud-s">0.00 m</div></div>
+        <div class="readout"><div class="l">Kecepatan</div><div class="v mono" id="hud-v">0.00 m/s</div></div>
+        <div class="readout"><div class="l">Percepatan</div><div class="v mono" id="hud-a">0.00 m/s²</div></div>
+        <div class="readout"><div class="l">Gaya Netto</div><div class="v mono" id="hud-fnet">0.0 N</div></div>
+      </div>
+
+      <div class="graphs">
+        <div class="graph-card">
+          <h4>Grafik Kecepatan – Waktu (v–t)</h4>
+          <canvas class="graph" id="graph-v" width="420" height="110"></canvas>
+        </div>
+        <div class="graph-card">
+          <h4>Grafik Posisi – Waktu (s–t)</h4>
+          <canvas class="graph" id="graph-s" width="420" height="110"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div>
+      <div class="card">
+        <h3>⚙️ Pengaturan Percobaan</h3>
+
+        <div class="field">
+          <div class="row-label"><span>Massa Benda</span><span class="val mono" id="mass-val">3 kg</span></div>
+          <input type="range" id="mass-slider" min="1" max="10" step="1" value="3">
+        </div>
+
+        <div class="field">
+          <div class="row-label"><span>Gaya Dorong (F)</span><span class="val mono" id="force-val">10 N</span></div>
+          <input type="range" id="force-slider" min="0" max="50" step="1" value="10">
+        </div>
+
+        <div class="field">
+          <div class="row-label"><span>Permukaan (koefisien gesek μ)</span></div>
+          <div class="choice-row" id="surface-row">
+            <button class="choice-btn selected" data-surface="ice" data-mu="0.05">Es<small>μ = 0.05</small></button>
+            <button class="choice-btn" data-surface="asphalt" data-mu="0.3">Aspal<small>μ = 0.30</small></button>
+            <button class="choice-btn" data-surface="grass" data-mu="0.6">Rumput<small>μ = 0.60</small></button>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <span class="lbl">Aktifkan Gaya Dorong</span>
+          <label class="switch">
+            <input type="checkbox" id="force-toggle">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <button class="reset-btn" id="reset-btn">↺ Reset Percobaan</button>
+
+        <div class="note" id="status-note">Benda diam. Aktifkan gaya dorong untuk mulai bergerak.</div>
+
+        <div class="calc-box" id="calc-box">
+          F<sub>gesek</sub> = μ × m × g = <span class="mono">0.05 × 3 × 10 = 1.5 N</span><br>
+          ΣF = F − F<sub>gesek</sub> = <span class="mono">0.0 N</span><br>
+          a = ΣF ÷ m = <span class="mono">0.00 m/s²</span>
+        </div>
+
+        <div class="note" style="background:#eef0ff;border-color:#d3d9ff;color:#2b3a8f;">
+          🎯 Tantangan: atur gaya dorong sama besar dengan gaya gesek agar benda bergerak dengan <b>kecepatan tetap (GLB)</b>!
+        </div>
+        <div id="celebrate">✅ GLB tercapai! Gaya dorong ≈ Gaya gesek, sehingga percepatan ≈ 0.</div>
+      </div>
+
+      <div class="card">
+        <h3>📒 Catatan Percobaan</h3>
+        <table class="history">
+          <thead><tr><th>No</th><th>m (kg)</th><th>F (N)</th><th>μ</th><th>a (m/s²)</th></tr></thead>
+          <tbody id="history-body">
+            <tr class="empty-row"><td colspan="5">Jalankan dan hentikan percobaan untuk mencatat data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Atur <b>massa benda</b>, <b>gaya dorong (F)</b>, dan pilih <b>permukaan</b> (menentukan koefisien gesek μ).</li>
+      <li>Nyalakan saklar <b>Aktifkan Gaya Dorong</b> untuk mulai mendorong benda, amati grafik v–t dan s–t yang bergerak langsung.</li>
+      <li>Matikan saklar untuk melihat efek gaya gesek saja (benda melambat lalu berhenti).</li>
+      <li>Perhatikan kotak perhitungan otomatis: F<sub>gesek</sub> = μmg, ΣF = F − F<sub>gesek</sub>, dan a = ΣF/m.</li>
+      <li>Coba selesaikan tantangan GLB, lalu tekan <b>Reset</b> dan ulangi dengan kombinasi nilai lain. Catat pengamatanmu di LKS.</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> Gerak Lurus Beraturan (GLB), Gerak Lurus Berubah Beraturan (GLBB), gaya gesek kinetis (F = μN), dan Hukum II Newton (ΣF = m·a).</li>
+      <li><b>Cara pakai:</b> mulai dengan gaya dorong kecil pada permukaan berbeda untuk menunjukkan bahwa benda tidak selalu bergerak (gaya belum melebihi gesekan). Lanjutkan dengan menambah gaya dorong hingga benda mulai bergerak dipercepat.</li>
+      <li><b>Diferensiasi massa:</b> ubah massa pada gaya dan permukaan yang sama untuk mendiskusikan bagaimana massa memengaruhi percepatan (Hukum II Newton).</li>
+      <li>Grafik v–t dan s–t dapat digunakan untuk melatih siswa membaca grafik gerak — kemiringan grafik v–t menunjukkan percepatan, kemiringan grafik s–t menunjukkan kecepatan.</li>
+      <li>LKS pendamping tersedia di folder <code>worksheet/</code>, dan panduan penggunaan lengkap ada di <code>README.md</code> pada repository.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>
+  Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SMP · Topik: Gerak Lurus, Gaya Gesek &amp; Hukum II Newton.
+</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const groundY = H*0.72;
+  const meterToPx = 34;
+  const g = 10;
+
+  const gvCanvas = document.getElementById('graph-v');
+  const gsCanvas = document.getElementById('graph-s');
+  const gvCtx = gvCanvas.getContext('2d');
+  const gsCtx = gsCanvas.getContext('2d');
+
+  let state = {
+    mass: 3,
+    force: 10,
+    mu: 0.05,
+    surface: 'ice',
+    forceOn: false,
+    t: 0,
+    s: 0,
+    v: 0,
+    a: 0,
+    fnet: 0,
+    running: false,
+    history: [], // {t,v,s}
+    glbTimer: 0,
+    attempt: 0
+  };
+
+  const surfColors = {
+    ice:{ ground:'#dff3ff', label:'Es' },
+    asphalt:{ ground:'#5a5f7c', label:'Aspal' },
+    grass:{ ground:'#8bd155', label:'Rumput' }
+  };
+
+  const massSlider = document.getElementById('mass-slider');
+  const forceSlider = document.getElementById('force-slider');
+  const massVal = document.getElementById('mass-val');
+  const forceVal = document.getElementById('force-val');
+  const forceToggle = document.getElementById('force-toggle');
+
+  massSlider.addEventListener('input', ()=>{
+    state.mass = +massSlider.value;
+    massVal.textContent = state.mass + ' kg';
+    updateCalcBox();
+  });
+  forceSlider.addEventListener('input', ()=>{
+    state.force = +forceSlider.value;
+    forceVal.textContent = state.force + ' N';
+    updateCalcBox();
+  });
+  document.getElementById('surface-row').addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn');
+    if(!btn) return;
+    document.querySelectorAll('#surface-row .choice-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.surface = btn.dataset.surface;
+    state.mu = +btn.dataset.mu;
+    updateCalcBox();
+    draw();
+  });
+  forceToggle.addEventListener('change', ()=>{
+    state.forceOn = forceToggle.checked;
+    if(state.forceOn && !state.running){ startRun(); }
+    updateStatusNote();
+  });
+  document.getElementById('reset-btn').addEventListener('click', resetAll);
+
+  function updateCalcBox(){
+    const Fg = state.mu*state.mass*g;
+    const Fapplied = state.forceOn ? state.force : 0;
+    const netF = state.v>0 ? (Fapplied - Fg) : (Fapplied>Fg ? Fapplied-Fg : 0);
+    const a = netF/state.mass;
+    document.getElementById('calc-box').innerHTML =
+      `F<sub>gesek</sub> = μ × m × g = <span class="mono">${state.mu} × ${state.mass} × 10 = ${Fg.toFixed(1)} N</span><br>` +
+      `ΣF = F − F<sub>gesek</sub> = <span class="mono">${Fapplied.toFixed(1)} − ${Fg.toFixed(1)} = ${netF.toFixed(1)} N</span><br>` +
+      `a = ΣF ÷ m = <span class="mono">${netF.toFixed(1)} ÷ ${state.mass} = ${a.toFixed(2)} m/s²</span>`;
+  }
+
+  function updateStatusNote(){
+    const note = document.getElementById('status-note');
+    if(!state.forceOn && state.v===0 && state.t===0){
+      note.textContent = "Benda diam. Aktifkan gaya dorong untuk mulai bergerak.";
+    } else if(state.forceOn){
+      const Fg = state.mu*state.mass*g;
+      if(state.force <= Fg && state.v===0){
+        note.textContent = "Gaya dorong belum melebihi gaya gesek statis — benda belum bergerak.";
+      } else {
+        note.textContent = "Gaya dorong aktif — amati grafik dan pembacaan di atas.";
+      }
+    } else if(state.v>0){
+      note.textContent = "Gaya dorong dimatikan — gaya gesek memperlambat benda hingga berhenti.";
+    } else {
+      note.textContent = "Benda berhenti. Tekan Reset untuk mengulang, atau ubah pengaturan lalu aktifkan gaya dorong lagi.";
+    }
+  }
+
+  function startRun(){
+    state.running = true;
+    document.getElementById('celebrate').style.display='none';
+    requestAnimationFrame(loop);
+  }
+
+  function resetAll(){
+    state.t=0; state.s=0; state.v=0; state.a=0; state.fnet=0;
+    state.forceOn=false; state.running=false; state.history=[]; state.glbTimer=0;
+    forceToggle.checked=false;
+    document.getElementById('celebrate').style.display='none';
+    updateHud(); updateStatusNote(); updateCalcBox();
+    drawGraphs(); draw();
+  }
+
+  let lastT=null;
+  function loop(t){
+    if(!state.running) return;
+    if(lastT===null) lastT=t;
+    const dt = Math.min((t-lastT)/1000, 0.05);
+    lastT=t;
+
+    const Fg = state.mu*state.mass*g;
+    const Fapplied = state.forceOn ? state.force : 0;
+    let netF;
+    if(state.v>0.0005){
+      netF = Fapplied - Fg;
+    } else {
+      // at rest: only moves if applied force exceeds static friction
+      netF = Fapplied > Fg ? Fapplied - Fg : 0;
+    }
+    const a = netF/state.mass;
+    state.v = Math.max(0, state.v + a*dt);
+    state.s += state.v*dt;
+    state.a = a;
+    state.fnet = netF;
+    state.t += dt;
+
+    // GLB challenge detection
+    if(state.forceOn && state.v>0.15 && Math.abs(a) < 0.06){
+      state.glbTimer += dt;
+      if(state.glbTimer > 1.5){
+        document.getElementById('celebrate').style.display='block';
+      }
+    } else {
+      state.glbTimer = 0;
+    }
+
+    if(state.history.length===0 || state.t - state.history[state.history.length-1].t > 0.08){
+      state.history.push({t:state.t, v:state.v, s:state.s});
+      if(state.history.length>250) state.history.shift();
+    }
+
+    updateHud();
+    updateCalcBox();
+    updateStatusNote();
+    draw();
+    drawGraphs();
+
+    if(!state.forceOn && state.v<=0.001 && state.t>0){
+      state.running=false;
+      logAttempt();
+      return;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function logAttempt(){
+    state.attempt++;
+    const tbody = document.getElementById('history-body');
+    const empty = tbody.querySelector('.empty-row');
+    if(empty) empty.remove();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${state.attempt}</td><td>${state.mass}</td><td>${state.force}</td><td>${state.mu}</td><td>${state.a.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  function updateHud(){
+    document.getElementById('hud-t').textContent = state.t.toFixed(1)+' s';
+    document.getElementById('hud-s').textContent = state.s.toFixed(2)+' m';
+    document.getElementById('hud-v').textContent = state.v.toFixed(2)+' m/s';
+    document.getElementById('hud-a').textContent = state.a.toFixed(2)+' m/s²';
+    document.getElementById('hud-fnet').textContent = state.fnet.toFixed(1)+' N';
+  }
+
+  function drawGrid(c, w, h){
+    c.strokeStyle = 'var(--grid-line)';
+    c.strokeStyle = '#dde2f5';
+    c.lineWidth = 1;
+    for(let x=0;x<w;x+=24){ c.beginPath(); c.moveTo(x,0); c.lineTo(x,h); c.stroke(); }
+    for(let y=0;y<h;y+=24){ c.beginPath(); c.moveTo(0,y); c.lineTo(w,y); c.stroke(); }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#f7f9ff';
+    ctx.fillRect(0,0,W,H);
+    drawGrid(ctx, W, H);
+
+    const surf = surfColors[state.surface];
+    ctx.fillStyle = surf.ground;
+    ctx.fillRect(0,groundY,W,H-groundY);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillRect(0,groundY,W,4);
+
+    const camX = Math.max(0, state.s*meterToPx - W*0.3);
+
+    // ruler
+    ctx.strokeStyle = '#00000030';
+    ctx.fillStyle = '#00000070';
+    ctx.font = '11px JetBrains Mono';
+    ctx.lineWidth = 1.5;
+    const startMeter = Math.floor(camX/meterToPx) - 1;
+    for(let m=startMeter; m<startMeter+(W/meterToPx)+2; m++){
+      if(m<0) continue;
+      const x = m*meterToPx - camX;
+      ctx.beginPath(); ctx.moveTo(x,groundY); ctx.lineTo(x,groundY+7); ctx.stroke();
+      if(m%2===0) ctx.fillText(m+'m', x-8, groundY+20);
+    }
+
+    // block
+    const blockXpx = state.s*meterToPx - camX + 70;
+    drawBlock(blockXpx, groundY, state.mass, state.forceOn, state.fnet, state.v);
+  }
+
+  function drawBlock(x, gY, mass, forceOn, fnet, v){
+    const size = 30 + mass*4;
+    const y = gY - size;
+    ctx.save();
+    ctx.translate(x,0);
+
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.beginPath();
+    ctx.ellipse(size/2, gY+6, size*0.55, 6, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // crate body
+    ctx.fillStyle = '#c98a4b';
+    ctx.strokeStyle = '#93602c';
+    ctx.lineWidth = 2;
+    ctx.fillRect(0, y, size, size);
+    ctx.strokeRect(0, y, size, size);
+    ctx.beginPath();
+    ctx.moveTo(0,y); ctx.lineTo(size,y+size);
+    ctx.moveTo(size,y); ctx.lineTo(0,y+size);
+    ctx.stroke();
+
+    // mass label
+    ctx.fillStyle = '#2b2d42';
+    ctx.font = 'bold 12px JetBrains Mono';
+    ctx.textAlign='center';
+    ctx.fillText(mass+' kg', size/2, y-8);
+    ctx.textAlign='left';
+
+    // force arrows
+    const arrowY = y + size/2;
+    if(forceOn && state.force>0){
+      drawArrow(size+4, arrowY-10, Math.min(60, state.force*1.1), '#2f5fe0');
+      ctx.fillStyle='#2f5fe0';
+      ctx.font='bold 11px JetBrains Mono';
+      ctx.fillText('F', size+8, arrowY-16);
+    }
+    if(v>0.01 || (forceOn && state.force>state.mu*state.mass*10)){
+      const Fg = state.mu*state.mass*10;
+      drawArrow(-4, arrowY+14, -Math.min(60, Fg*1.1), '#e0473b');
+      ctx.fillStyle='#e0473b';
+      ctx.font='bold 11px JetBrains Mono';
+      ctx.fillText('f', -18, arrowY+30);
+    }
+
+    ctx.restore();
+  }
+
+  function drawArrow(x,y,len,color){
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x+len,y);
+    ctx.stroke();
+    const dir = len>=0?1:-1;
+    ctx.beginPath();
+    ctx.moveTo(x+len,y);
+    ctx.lineTo(x+len-8*dir,y-5);
+    ctx.lineTo(x+len-8*dir,y+5);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawGraphs(){
+    plotGraph(gvCtx, gvCanvas, state.history.map(p=>[p.t,p.v]), '#2f5fe0', 'v (m/s)');
+    plotGraph(gsCtx, gsCanvas, state.history.map(p=>[p.t,p.s]), '#16a34a', 's (m)');
+  }
+
+  function plotGraph(c, cv, points, color, label){
+    const w = cv.width, h = cv.height;
+    c.clearRect(0,0,w,h);
+    c.strokeStyle = '#e3e6f7';
+    c.lineWidth = 1;
+    for(let i=0;i<=4;i++){
+      const y = h - (i/4)*(h-16) - 8;
+      c.beginPath(); c.moveTo(28,y); c.lineTo(w-6,y); c.stroke();
+    }
+    if(points.length<2) return;
+    const tMax = Math.max(points[points.length-1][0], 5);
+    const tMin = Math.max(0, tMax-12);
+    const visible = points.filter(p=>p[0]>=tMin);
+    const yMax = Math.max(1, ...visible.map(p=>p[1]))*1.15;
+
+    c.strokeStyle = color;
+    c.lineWidth = 2.4;
+    c.beginPath();
+    visible.forEach((p,i)=>{
+      const px = 28 + ((p[0]-tMin)/(tMax-tMin||1))*(w-34);
+      const py = h-8 - (p[1]/yMax)*(h-16);
+      if(i===0) c.moveTo(px,py); else c.lineTo(px,py);
+    });
+    c.stroke();
+
+    c.fillStyle = '#8a8fae';
+    c.font = '10px JetBrains Mono';
+    c.fillText(yMax.toFixed(1), 2, 12);
+    c.fillText('0', 10, h-6);
+  }
+
+  updateCalcBox();
+  updateStatusNote();
+  draw();
+  drawGraphs();
+})();
+</script>
+</body>
+</html>

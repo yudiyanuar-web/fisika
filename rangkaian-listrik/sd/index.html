@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyalakan Lampunya! Simulasi Rangkaian Listrik - SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#7fc4ff; --sky-bottom:#e9f8ff;
+    --coral:#ff6b6b; --coral-dark:#e14f4f;
+    --sun:#ffd23f; --ink:#2b2d42;
+    --card:#ffffff; --panel:#fff8ec;
+    --wood:#c98a4b; --wood-dark:#93602c;
+    --radius:22px; --shadow:0 10px 24px rgba(43,45,66,0.12);
+    --wire:#5b5f7a; --wire-on:#3a9c3a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Nunito',sans-serif;background:linear-gradient(180deg,#cdeaff 0%, #f4fbff 40%);color:var(--ink);min-height:100vh;padding-bottom:40px;}
+  h1,h2,h3,.display{font-family:'Baloo 2',sans-serif;}
+
+  header.top{max-width:1100px;margin:0 auto;padding:22px 20px 10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(160deg, var(--coral), #ff9b6b);display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:var(--shadow);}
+  .brand h1{font-size:22px;margin:0;line-height:1.1;}
+  .brand p{margin:2px 0 0;font-size:13px;color:#5b5f7a;font-weight:700;}
+  .level-track{display:flex;gap:8px;align-items:center;}
+  .level-pill{font-family:'Baloo 2';font-size:13px;padding:7px 14px;border-radius:999px;font-weight:700;border:2px solid transparent;}
+  .level-pill.active{background:var(--coral);color:#fff;box-shadow:0 4px 10px rgba(255,107,107,.4);}
+  .level-pill.linked{background:#fff;color:#5b5f7a;border-color:#e3e6f5;text-decoration:none;cursor:pointer;}
+  .level-pill.linked:hover{border-color:var(--coral);color:var(--coral-dark);}
+  .breadcrumb{max-width:1100px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096b3;}
+  .breadcrumb a{color:#5b5f7a;text-decoration:none;}
+  .breadcrumb a:hover{color:var(--coral);text-decoration:underline;}
+
+  main{max-width:1100px;margin:0 auto;padding:10px 20px;}
+  .layout{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:860px){ .layout{grid-template-columns:1fr;} }
+
+  .scene-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .scene-wrap{position:relative;border-radius:16px;overflow:hidden;background:var(--sky-bottom);}
+  canvas{display:block;width:100%;height:auto;}
+
+  .scoreboard{position:absolute;top:10px;left:10px;display:flex;gap:8px;flex-wrap:wrap;}
+  .plank{background:var(--wood);border:3px solid var(--wood-dark);border-radius:10px;padding:6px 12px;color:#fff8ec;font-family:'Baloo 2';text-align:center;box-shadow:0 4px 0 var(--wood-dark);min-width:104px;}
+  .plank .label{font-size:10px;letter-spacing:.5px;opacity:.85;}
+  .plank .value{font-size:18px;line-height:1.1;}
+
+  .speech-bubble{margin-top:12px;background:var(--panel);border:3px solid #ffe3ad;border-radius:18px;padding:12px 16px;font-weight:700;font-size:15px;display:flex;gap:10px;align-items:flex-start;min-height:26px;}
+  .speech-bubble .mascot-face{font-size:26px;}
+
+  .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:18px;}
+  .panel h3{margin:0 0 10px;font-size:17px;}
+
+  .obj-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px;}
+  .obj-btn{border:3px solid #e7e9f5;background:#fbfbff;border-radius:14px;padding:10px 4px;font-weight:800;font-size:11.5px;color:var(--ink);cursor:pointer;text-align:center;}
+  .obj-btn .emoji{display:block;font-size:24px;margin-bottom:2px;}
+  .obj-btn.selected{border-color:var(--coral);background:#fff0ee;color:var(--coral-dark);}
+  .obj-btn.tested::after{content:" ✓";color:#3a9c3a;}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--panel);padding:12px 14px;border-radius:14px;margin:14px 0;}
+  .toggle-row .lbl{font-weight:800;font-size:14px;}
+  .switch{position:relative;width:52px;height:28px;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider-toggle{position:absolute;cursor:pointer;inset:0;background:#c9cfe8;border-radius:999px;transition:.2s;}
+  .slider-toggle::before{content:"";position:absolute;height:22px;width:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+  input:checked + .slider-toggle{background:var(--coral);}
+  input:checked + .slider-toggle::before{transform:translateX(24px);}
+
+  .choice-row{display:flex;gap:8px;margin-bottom:6px;}
+  .choice-btn{flex:1;border:3px solid #e7e9f5;background:#fbfbff;border-radius:14px;padding:9px 6px;font-weight:800;font-size:13px;color:var(--ink);cursor:pointer;text-align:center;}
+  .choice-btn.selected{border-color:var(--coral);background:#fff0ee;color:var(--coral-dark);}
+
+  .challenge{background:linear-gradient(160deg,#fff6e0,#ffe9c9);border:3px dashed var(--sun);border-radius:16px;padding:12px 14px;font-weight:800;font-size:14px;margin-top:14px;}
+  #celebrate{display:none;margin-top:8px;font-family:'Baloo 2';color:#3a9c3a;font-size:15px;}
+
+  table.history{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;}
+  table.history th,table.history td{padding:6px;text-align:center;border-bottom:1px solid #eef0fa;}
+  table.history th{color:#8a8fae;font-size:10.5px;text-transform:uppercase;}
+
+  details.help{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-top:18px;}
+  details.help + details.help{margin-top:12px;}
+  details.help summary{font-family:'Baloo 2';font-size:17px;cursor:pointer;list-style:none;}
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--coral);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol,details.help ul{padding-left:20px;line-height:1.7;}
+
+  footer{max-width:1100px;margin:26px auto 0;padding:0 20px;font-size:12px;color:#8a8fae;text-align:center;}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Rangkaian Listrik</a> › <b>SD</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🔌</div>
+    <div>
+      <h1>Nyalakan Lampunya!</h1>
+      <p>Simulasi Rangkaian Listrik — Seri 1 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <span class="level-pill active">SD</span>
+    <a class="level-pill linked" href="../smp/index.html">SMP →</a>
+    <a class="level-pill linked" href="../sma/index.html">SMA →</a>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <div class="scene-card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="420"></canvas>
+        <div class="scoreboard">
+          <div class="plank"><div class="label">BENDA DIUJI</div><div class="value"><span id="hud-tested">0</span> / 8</div></div>
+          <div class="plank"><div class="label">KONDUKTOR</div><div class="value"><span id="hud-conductors">0</span> ditemukan</div></div>
+        </div>
+      </div>
+      <div class="speech-bubble">
+        <span class="mascot-face">🙂</span>
+        <span id="tip-text">Halo! Aku Kak Setrum. Pilih satu benda untuk diuji, lalu tutup saklarnya untuk melihat apakah lampu menyala!</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3>1️⃣ Pilih Benda untuk Diuji</h3>
+        <div class="obj-grid" id="object-grid">
+          <button class="obj-btn" data-obj="sendok" data-conductor="1"><span class="emoji">🥄</span>Sendok Logam</button>
+          <button class="obj-btn" data-obj="kunci" data-conductor="1"><span class="emoji">🔑</span>Kunci Besi</button>
+          <button class="obj-btn" data-obj="koin" data-conductor="1"><span class="emoji">🪙</span>Uang Logam</button>
+          <button class="obj-btn" data-obj="alumunium" data-conductor="1"><span class="emoji">🧻</span>Alumunium Foil</button>
+          <button class="obj-btn" data-obj="penggaris" data-conductor="0"><span class="emoji">📏</span>Penggaris Plastik</button>
+          <button class="obj-btn" data-obj="penghapus" data-conductor="0"><span class="emoji">🧽</span>Karet Penghapus</button>
+          <button class="obj-btn" data-obj="pensil" data-conductor="0"><span class="emoji">✏️</span>Pensil Kayu</button>
+          <button class="obj-btn" data-obj="kertas" data-conductor="0"><span class="emoji">📄</span>Kertas</button>
+        </div>
+
+        <h3 style="margin-top:16px;">2️⃣ Atur Rangkaian</h3>
+        <div class="choice-row" id="battery-row">
+          <button class="choice-btn selected" data-batt="1">🔋 1 Baterai</button>
+          <button class="choice-btn" data-batt="2">🔋🔋 2 Baterai</button>
+        </div>
+        <div class="toggle-row">
+          <span class="lbl">Tutup Saklar (Nyalakan)</span>
+          <label class="switch"><input type="checkbox" id="switch-toggle"><span class="slider-toggle"></span></label>
+        </div>
+
+        <div class="challenge">🎯 Tantangan: uji semua 8 benda dan temukan semua benda yang bisa menghantarkan listrik (konduktor)!</div>
+        <div id="celebrate">🎉 Hebat! Semua benda sudah diuji!</div>
+      </div>
+
+      <div class="panel">
+        <h3>📒 Catatan Percobaan</h3>
+        <table class="history">
+          <thead><tr><th>Benda</th><th>Hasil</th></tr></thead>
+          <tbody id="history-body">
+            <tr><td>Sendok Logam</td><td id="res-sendok">—</td></tr>
+            <tr><td>Kunci Besi</td><td id="res-kunci">—</td></tr>
+            <tr><td>Uang Logam</td><td id="res-koin">—</td></tr>
+            <tr><td>Alumunium Foil</td><td id="res-alumunium">—</td></tr>
+            <tr><td>Penggaris Plastik</td><td id="res-penggaris">—</td></tr>
+            <tr><td>Karet Penghapus</td><td id="res-penghapus">—</td></tr>
+            <tr><td>Pensil Kayu</td><td id="res-pensil">—</td></tr>
+            <tr><td>Kertas</td><td id="res-kertas">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Pilih salah satu <b>benda</b> yang ingin diuji (misalnya sendok logam atau penggaris plastik).</li>
+      <li>Tutup <b>saklar</b> dengan menggeser tombolnya ke kanan.</li>
+      <li>Amati apakah <b>lampu menyala</b> atau tidak.</li>
+      <li>Jika lampu menyala, benda tersebut adalah <b>konduktor</b> (bisa menghantarkan listrik). Jika tidak menyala, benda tersebut adalah <b>isolator</b>.</li>
+      <li>Catat hasilnya, lalu coba benda lain sampai semua 8 benda selesai diuji.</li>
+      <li>Coba juga tambahkan baterai menjadi 2 — apa yang terjadi pada nyala lampu?</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru / Orang Tua</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> rangkaian listrik sederhana (tertutup vs terbuka), serta pengelompokan benda menjadi konduktor dan isolator listrik.</li>
+      <li><b>Cara pakai di kelas:</b> ajak siswa memprediksi dulu ("menurutmu sendok logam bisa menyalakan lampu atau tidak?") sebelum mencoba, lalu bandingkan dengan hasil simulasi.</li>
+      <li><b>Ide diskusi:</b> hubungkan dengan alasan kabel listrik dibungkus plastik (isolator) padahal di dalamnya tembaga (konduktor), dan mengapa gagang setrika/panci terbuat dari plastik atau kayu.</li>
+      <li>LKS pendamping ada di folder <code>worksheet/</code>, panduan lengkap ada di <code>README.md</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SD · Topik: Rangkaian Listrik Sederhana, Konduktor &amp; Isolator.</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const objects = {
+    sendok:{ label:'Sendok Logam', emoji:'🥄', conductor:true },
+    kunci:{ label:'Kunci Besi', emoji:'🔑', conductor:true },
+    koin:{ label:'Uang Logam', emoji:'🪙', conductor:true },
+    alumunium:{ label:'Alumunium Foil', emoji:'🧻', conductor:true },
+    penggaris:{ label:'Penggaris Plastik', emoji:'📏', conductor:false },
+    penghapus:{ label:'Karet Penghapus', emoji:'🧽', conductor:false },
+    pensil:{ label:'Pensil Kayu', emoji:'✏️', conductor:false },
+    kertas:{ label:'Kertas', emoji:'📄', conductor:false }
+  };
+
+  let state = {
+    selectedObj: null,
+    switchOn: false,
+    batteries: 1,
+    tested: new Set(),
+    conductorsFound: new Set(),
+    flowPhase: 0
+  };
+
+  document.getElementById('object-grid').addEventListener('click', e=>{
+    const btn = e.target.closest('.obj-btn');
+    if(!btn) return;
+    document.querySelectorAll('.obj-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.selectedObj = btn.dataset.obj;
+    evaluateCircuit(true);
+  });
+
+  document.getElementById('battery-row').addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn');
+    if(!btn) return;
+    document.querySelectorAll('#battery-row .choice-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.batteries = +btn.dataset.batt;
+    setTip(state.batteries===2 ? "Dua baterai dipasang! Kalau rangkaiannya tertutup, lampu akan menyala lebih terang." : "Satu baterai dipasang.", "🙂");
+    draw();
+  });
+
+  document.getElementById('switch-toggle').addEventListener('change', e=>{
+    state.switchOn = e.target.checked;
+    evaluateCircuit(true);
+  });
+
+  function evaluateCircuit(logTip){
+    const obj = state.selectedObj ? objects[state.selectedObj] : null;
+    const closed = state.switchOn && obj && obj.conductor;
+
+    if(logTip){
+      if(!obj){
+        setTip("Pilih dulu salah satu benda untuk diuji ya!", "🙂");
+      } else if(!state.switchOn){
+        setTip("Saklar masih terbuka. Tutup saklarnya untuk menguji rangkaian!", "🙂");
+      } else if(obj.conductor){
+        setTip(obj.label + " adalah KONDUKTOR — bisa menghantarkan listrik. Lampu menyala! 💡", "😃");
+      } else {
+        setTip(obj.label + " adalah ISOLATOR — tidak bisa menghantarkan listrik. Lampu tetap mati.", "😮");
+      }
+    }
+
+    if(obj && state.switchOn){
+      state.tested.add(state.selectedObj);
+      const cell = document.getElementById('res-'+state.selectedObj);
+      if(obj.conductor){
+        cell.textContent = '✅ Konduktor';
+        cell.style.color = '#3a9c3a'; cell.style.fontWeight = '800';
+        state.conductorsFound.add(state.selectedObj);
+      } else {
+        cell.textContent = '🚫 Isolator';
+        cell.style.color = '#e14f4f'; cell.style.fontWeight = '800';
+      }
+      document.querySelector('.obj-btn[data-obj="'+state.selectedObj+'"]').classList.add('tested');
+    }
+
+    document.getElementById('hud-tested').textContent = state.tested.size;
+    document.getElementById('hud-conductors').textContent = state.conductorsFound.size;
+    if(state.tested.size>=8){
+      document.getElementById('celebrate').style.display='block';
+    }
+
+    draw();
+  }
+
+  function setTip(text, face){
+    document.getElementById('tip-text').textContent = text;
+    document.querySelector('.mascot-face').textContent = face || '🙂';
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#eef3ff';
+    ctx.fillRect(0,0,W,H);
+
+    const obj = state.selectedObj ? objects[state.selectedObj] : null;
+    const closed = state.switchOn && obj && obj.conductor;
+
+    // circuit path points (rounded rectangle loop)
+    const left=140, right=760, top=110, bottom=320;
+    const path = [
+      [left,top],[right,top],[right,bottom],[left,bottom],[left,top]
+    ];
+
+    // wires
+    ctx.strokeStyle = closed ? '#3a9c3a' : '#5b5f7a';
+    ctx.lineWidth = 7;
+    ctx.lineJoin='round';
+    ctx.beginPath();
+    ctx.moveTo(path[0][0],path[0][1]);
+    for(let i=1;i<path.length;i++) ctx.lineTo(path[i][0],path[i][1]);
+    ctx.stroke();
+
+    // current flow animation
+    if(closed){
+      state.flowPhase += 3.2 * state.batteries;
+      ctx.fillStyle = '#ffd23f';
+      const totalLen = 2*(right-left) + 2*(bottom-top);
+      const dashGap = 34;
+      for(let d = state.flowPhase % dashGap; d < totalLen; d += dashGap){
+        const pt = pointAlongPath(d, left,right,top,bottom);
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 5, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    // battery (left side, vertical)
+    drawBattery((left+140)/2 - 10, (top+bottom)/2, state.batteries);
+
+    // bulb (top center)
+    drawBulb((left+right)/2, top, closed, state.batteries);
+
+    // switch (right side)
+    drawSwitch(right, (top+bottom)/2, state.switchOn);
+
+    // test gap (bottom center)
+    drawGap((left+right)/2, bottom, obj);
+  }
+
+  function pointAlongPath(d, left,right,top,bottom){
+    const segTop = right-left, segRight = bottom-top, segBottom = right-left, segLeft = bottom-top;
+    if(d < segTop) return {x:left+d, y:top};
+    d -= segTop;
+    if(d < segRight) return {x:right, y:top+d};
+    d -= segRight;
+    if(d < segBottom) return {x:right-d, y:bottom};
+    d -= segBottom;
+    return {x:left, y:bottom-d};
+  }
+
+  function drawBattery(x,y,count){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.fillStyle = '#2b2d42';
+    ctx.font = 'bold 13px Nunito';
+    ctx.textAlign='center';
+    for(let i=0;i<count;i++){
+      const yy = (i - (count-1)/2) * 46;
+      ctx.fillStyle = '#ffd23f';
+      ctx.strokeStyle = '#2b2d42';
+      ctx.lineWidth = 3;
+      ctx.fillRect(-22, yy-16, 44, 32);
+      ctx.strokeRect(-22, yy-16, 44, 32);
+      ctx.fillStyle = '#2b2d42';
+      ctx.fillText('+', -10, yy+5);
+      ctx.fillText('−', 10, yy+5);
+    }
+    ctx.restore();
+  }
+
+  function drawBulb(x,y,on,batteries){
+    ctx.save();
+    ctx.translate(x,y);
+    if(on){
+      const glowR = 46 + batteries*8;
+      const grad = ctx.createRadialGradient(0,0,5,0,0,glowR);
+      grad.addColorStop(0,'rgba(255,210,63,0.9)');
+      grad.addColorStop(1,'rgba(255,210,63,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(0,0,glowR,0,Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle = on ? '#ffd23f' : '#e6e8f2';
+    ctx.strokeStyle = '#5b5f7a';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0,-4,26,0,Math.PI*2);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#5b5f7a';
+    ctx.fillRect(-10,18,20,14);
+    ctx.strokeRect(-10,18,20,14);
+    if(!on){
+      ctx.strokeStyle='#b7bad2'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(-10,-14); ctx.lineTo(10,6);
+      ctx.moveTo(10,-14); ctx.lineTo(-10,6);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawSwitch(x,y,on){
+    ctx.save();
+    ctx.translate(x-40,y);
+    ctx.strokeStyle = '#2b2d42'; ctx.lineWidth = 5; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(-30,0);
+    if(on){ ctx.lineTo(30,0); } else { ctx.lineTo(20,-26); }
+    ctx.stroke();
+    ctx.fillStyle = '#2b2d42';
+    ctx.beginPath(); ctx.arc(-30,0,5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(30,0,5,0,Math.PI*2); ctx.fill();
+    ctx.font='bold 12px Nunito'; ctx.textAlign='center'; ctx.fillStyle='#5b5f7a';
+    ctx.fillText('Saklar', 0, 30);
+    ctx.restore();
+  }
+
+  function drawGap(x,y,obj){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.font='bold 12px Nunito'; ctx.textAlign='center'; ctx.fillStyle='#5b5f7a';
+    ctx.fillText('Titik Uji', 0, 40);
+    if(obj){
+      ctx.font='34px Nunito';
+      ctx.fillText(obj.emoji, 0, 10);
+      ctx.font='bold 11px Nunito';
+      ctx.fillStyle = obj.conductor ? '#3a9c3a' : '#e14f4f';
+      ctx.fillText(obj.label, 0, 58);
+    } else {
+      ctx.fillStyle='#b7bad2';
+      ctx.font='13px Nunito';
+      ctx.fillText('(belum dipilih)', 0, 6);
+    }
+    ctx.restore();
+  }
+
+  let lastTs=null;
+  function animate(ts){
+    if(state.switchOn && state.selectedObj && objects[state.selectedObj] && objects[state.selectedObj].conductor){
+      draw();
+    }
+    requestAnimationFrame(animate);
+  }
+
+  draw();
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>

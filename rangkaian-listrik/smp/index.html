@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Rangkaian Listrik - SMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1fb; --grid-line:#dde2f5;
+    --primary:#2f5fe0; --primary-dark:#1d3fb0;
+    --accent:#f5a524; --danger:#e0473b;
+    --ink:#111a3c; --muted:#616a92;
+    --card:#ffffff; --panel:#f5f7ff;
+    --console-bg:#0f1730; --console-text:#7ef7c5; --console-text-dim:#5b7fd8;
+    --radius:18px; --shadow:0 10px 26px rgba(23,32,80,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:40px;}
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  header.top{max-width:1150px;margin:0 auto;padding:22px 20px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(160deg,var(--primary),#5b8bff);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:var(--shadow);}
+  .brand h1{font-size:21px;margin:0;line-height:1.15;}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:700;}
+  .level-track{display:flex;gap:8px;}
+  .level-pill{font-family:'Space Grotesk';font-size:13px;padding:7px 14px;border-radius:999px;font-weight:700;border:2px solid transparent;}
+  .level-pill.done{background:#e7f7ee;color:#1c8a52;border-color:#bfe9d3;text-decoration:none;cursor:pointer;}
+  .level-pill.done:hover{border-color:#1c8a52;}
+  .level-pill.active{background:var(--primary);color:#fff;box-shadow:0 4px 10px rgba(47,95,224,.35);}
+  .level-pill.linked{background:#fff;color:#9aa0c0;border-color:#e3e6f5;text-decoration:none;cursor:pointer;}
+  .level-pill.linked:hover{border-color:var(--primary);color:var(--primary-dark);}
+  .breadcrumb{max-width:1150px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096b3;}
+  .breadcrumb a{color:#616a92;text-decoration:none;}
+  .breadcrumb a:hover{color:var(--primary);text-decoration:underline;}
+
+  main{max-width:1150px;margin:0 auto;padding:8px 20px;}
+  .layout{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:900px){ .layout{grid-template-columns:1fr;} }
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .scene-wrap{position:relative;border-radius:14px;overflow:hidden;background:#f7f9ff;border:1px solid var(--grid-line);}
+  canvas#scene{display:block;width:100%;height:auto;cursor:pointer;}
+
+  .console{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;background:var(--console-bg);border-radius:14px;padding:12px 14px;}
+  .console .readout{flex:1;min-width:96px;}
+  .console .readout .l{font-size:10px;color:var(--console-text-dim);letter-spacing:.4px;text-transform:uppercase;font-weight:700;}
+  .console .readout .v{font-size:18px;color:var(--console-text);font-weight:700;}
+
+  .meter-row{display:flex;gap:8px;margin-top:10px;}
+  .meter-btn{flex:1;border:2px solid var(--grid-line);background:#fbfcff;border-radius:10px;padding:8px;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .meter-btn.selected{border-color:var(--primary);background:#eaf0ff;color:var(--primary-dark);}
+
+  .bars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  .bar-card{background:var(--panel);border-radius:10px;padding:10px 10px 4px;}
+  .bar-card h4{margin:0 0 4px 2px;font-size:11.5px;color:var(--muted);font-weight:700;}
+  canvas.bar{display:block;width:100%;height:100px;}
+  @media (max-width:560px){ .bars{grid-template-columns:1fr;} }
+
+  .card h3{margin:0 0 10px;font-size:16px;}
+  .field{margin-bottom:16px;}
+  .field .row-label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;}
+  .field .row-label span.val{color:var(--primary);font-family:'JetBrains Mono';}
+  input[type=range]{width:100%;accent-color:var(--primary);}
+
+  .choice-row{display:flex;gap:8px;margin-bottom:6px;}
+  .choice-btn{flex:1;border:2px solid var(--grid-line);background:#fbfcff;border-radius:12px;padding:10px 6px;font-weight:700;font-size:13px;color:var(--ink);cursor:pointer;text-align:center;}
+  .choice-btn.selected{border-color:var(--primary);background:#eaf0ff;color:var(--primary-dark);}
+
+  .calc-box{background:var(--panel);border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;line-height:1.85;}
+  .calc-box .mono{color:var(--primary-dark);}
+
+  .note{background:#fff7e8;border:1px solid #ffe1a8;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;color:#8a5a00;margin-top:12px;}
+
+  table.history{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;}
+  table.history th,table.history td{padding:6px 4px;text-align:center;border-bottom:1px solid #eef0fa;}
+  table.history th{color:var(--muted);font-size:10px;text-transform:uppercase;}
+  .empty-row td{color:#b7bad2;font-style:italic;padding:14px 0;}
+  .reset-btn{width:100%;padding:10px;border-radius:12px;border:2px solid var(--grid-line);background:#fff;font-weight:800;color:var(--muted);cursor:pointer;margin-top:10px;}
+
+  details.help{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-top:18px;}
+  details.help + details.help{margin-top:12px;}
+  details.help summary{font-family:'Space Grotesk';font-size:16px;cursor:pointer;list-style:none;}
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--primary);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol,details.help ul{padding-left:20px;line-height:1.75;}
+
+  footer{max-width:1150px;margin:26px auto 0;padding:0 20px;font-size:12px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Rangkaian Listrik</a> › <b>SMP</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🔋</div>
+    <div>
+      <h1>Lab Rangkaian Listrik</h1>
+      <p>Simulasi Fisika Interaktif — Seri 2 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <a class="level-pill done" href="../sd/index.html">← SD</a>
+    <span class="level-pill active">SMP</span>
+    <a class="level-pill linked" href="../sma/index.html">SMA →</a>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <div class="card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="360"></canvas>
+      </div>
+
+      <div class="meter-row">
+        <button class="meter-btn selected" data-target="r1">🔍 Ukur Lampu 1 (R1)</button>
+        <button class="meter-btn" data-target="r2">🔍 Ukur Lampu 2 (R2)</button>
+        <button class="meter-btn" data-target="total">🔍 Ukur Total</button>
+      </div>
+
+      <div class="console">
+        <div class="readout"><div class="l">Tegangan (V)</div><div class="v mono" id="hud-v">0.0 V</div></div>
+        <div class="readout"><div class="l">Arus (I)</div><div class="v mono" id="hud-i">0.00 A</div></div>
+        <div class="readout"><div class="l">Hambatan (R)</div><div class="v mono" id="hud-r">0 Ω</div></div>
+        <div class="readout"><div class="l">Daya (P)</div><div class="v mono" id="hud-p">0.00 W</div></div>
+      </div>
+
+      <div class="bars">
+        <div class="bar-card"><h4>Arus tiap Lampu (A)</h4><canvas class="bar" id="bar-i" width="420" height="100"></canvas></div>
+        <div class="bar-card"><h4>Tegangan tiap Lampu (V)</h4><canvas class="bar" id="bar-v" width="420" height="100"></canvas></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>⚙️ Pengaturan Rangkaian</h3>
+
+        <div class="field">
+          <div class="row-label"><span>Jenis Rangkaian</span></div>
+          <div class="choice-row" id="mode-row">
+            <button class="choice-btn selected" data-mode="seri">Seri</button>
+            <button class="choice-btn" data-mode="paralel">Paralel</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="row-label"><span>Tegangan Baterai (V)</span><span class="val mono" id="v-val">9 V</span></div>
+          <input type="range" id="v-slider" min="1" max="12" step="1" value="9">
+        </div>
+        <div class="field">
+          <div class="row-label"><span>Hambatan Lampu 1 (R1)</span><span class="val mono" id="r1-val">5 Ω</span></div>
+          <input type="range" id="r1-slider" min="1" max="20" step="1" value="5">
+        </div>
+        <div class="field">
+          <div class="row-label"><span>Hambatan Lampu 2 (R2)</span><span class="val mono" id="r2-val">10 Ω</span></div>
+          <input type="range" id="r2-slider" min="1" max="20" step="1" value="10">
+        </div>
+
+        <button class="reset-btn" id="reset-btn">↺ Catat Konfigurasi Ini</button>
+
+        <div class="calc-box" id="calc-box"></div>
+        <div class="note" id="insight-note"></div>
+      </div>
+
+      <div class="card">
+        <h3>📒 Catatan Percobaan</h3>
+        <table class="history">
+          <thead><tr><th>No</th><th>Mode</th><th>V</th><th>R1</th><th>R2</th><th>R total</th><th>I total</th></tr></thead>
+          <tbody id="history-body"><tr class="empty-row"><td colspan="7">Tekan "Catat Konfigurasi Ini" untuk menyimpan data.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Pilih jenis rangkaian: <b>Seri</b> atau <b>Paralel</b>.</li>
+      <li>Atur tegangan baterai (V) dan hambatan kedua lampu (R1, R2), lalu amati terang kedua lampu pada gambar rangkaian.</li>
+      <li>Klik tombol <b>Ukur Lampu 1</b>, <b>Ukur Lampu 2</b>, atau <b>Ukur Total</b> untuk membaca nilai V, I, R, dan P pada panel data (seperti multimeter sungguhan). Kamu juga bisa langsung mengklik komponen di gambar rangkaian.</li>
+      <li>Bandingkan grafik batang arus dan tegangan pada kedua lampu — perhatikan mana yang sama besar dan mana yang berbeda pada rangkaian seri vs paralel.</li>
+      <li>Tekan <b>Catat Konfigurasi Ini</b> untuk menyimpan hasil ke tabel, lalu coba kombinasi lain.</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> Hukum Ohm (V = I·R), hambatan total rangkaian seri (R = R1+R2) dan paralel (1/R = 1/R1+1/R2), serta sifat arus dan tegangan pada tiap jenis rangkaian.</li>
+      <li><b>Temuan kunci</b> yang bisa digali dari simulasi: pada rangkaian <b>seri</b>, arus di semua titik sama besar tetapi tegangan terbagi; pada rangkaian <b>paralel</b>, tegangan di semua cabang sama besar tetapi arus terbagi.</li>
+      <li><b>Ide diskusi:</b> mengapa lampu hias/natal lama menggunakan rangkaian seri (satu lampu mati, semua mati) sedangkan instalasi listrik rumah menggunakan rangkaian paralel (satu alat mati, yang lain tetap menyala)?</li>
+      <li>LKS pendamping ada di folder <code>worksheet/</code>, panduan lengkap di <code>README.md</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SMP · Topik: Rangkaian Seri &amp; Paralel, Hukum Ohm.</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const barICanvas = document.getElementById('bar-i');
+  const barVCanvas = document.getElementById('bar-v');
+  const barICtx = barICanvas.getContext('2d');
+  const barVCtx = barVCanvas.getContext('2d');
+
+  let state = {
+    mode:'seri', V:9, R1:5, R2:10, target:'r1',
+    attempt:0, flowPhase:0
+  };
+
+  function compute(){
+    const {V,R1,R2,mode} = state;
+    let Rtotal, Itotal, I1,I2,V1,V2;
+    if(mode==='seri'){
+      Rtotal = R1+R2;
+      Itotal = V/Rtotal;
+      I1=Itotal; I2=Itotal;
+      V1=Itotal*R1; V2=Itotal*R2;
+    } else {
+      Rtotal = 1/((1/R1)+(1/R2));
+      V1=V; V2=V;
+      I1=V/R1; I2=V/R2;
+      Itotal=I1+I2;
+    }
+    const P1=V1*I1, P2=V2*I2, Ptotal=V*Itotal;
+    return {Rtotal,Itotal,I1,I2,V1,V2,P1,P2,Ptotal};
+  }
+
+  const vSlider=document.getElementById('v-slider'), r1Slider=document.getElementById('r1-slider'), r2Slider=document.getElementById('r2-slider');
+  vSlider.addEventListener('input',()=>{ state.V=+vSlider.value; document.getElementById('v-val').textContent=state.V+' V'; refresh(); });
+  r1Slider.addEventListener('input',()=>{ state.R1=+r1Slider.value; document.getElementById('r1-val').textContent=state.R1+' Ω'; refresh(); });
+  r2Slider.addEventListener('input',()=>{ state.R2=+r2Slider.value; document.getElementById('r2-val').textContent=state.R2+' Ω'; refresh(); });
+
+  document.getElementById('mode-row').addEventListener('click', e=>{
+    const btn=e.target.closest('.choice-btn'); if(!btn) return;
+    document.querySelectorAll('#mode-row .choice-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.mode=btn.dataset.mode;
+    refresh();
+  });
+
+  document.querySelectorAll('.meter-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.meter-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.target = btn.dataset.target;
+      refresh();
+    });
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', ()=>{
+    const c = compute();
+    state.attempt++;
+    const tbody = document.getElementById('history-body');
+    const empty = tbody.querySelector('.empty-row');
+    if(empty) empty.remove();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${state.attempt}</td><td>${state.mode}</td><td>${state.V}</td><td>${state.R1}</td><td>${state.R2}</td><td>${c.Rtotal.toFixed(1)}</td><td>${c.Itotal.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  function updateReadouts(c){
+    let V,I,R,P;
+    if(state.target==='r1'){ V=c.V1; I=c.I1; R=state.R1; P=c.P1; }
+    else if(state.target==='r2'){ V=c.V2; I=c.I2; R=state.R2; P=c.P2; }
+    else { V=state.V; I=c.Itotal; R=c.Rtotal; P=c.Ptotal; }
+    document.getElementById('hud-v').textContent = V.toFixed(2)+' V';
+    document.getElementById('hud-i').textContent = I.toFixed(2)+' A';
+    document.getElementById('hud-r').textContent = R.toFixed(1)+' Ω';
+    document.getElementById('hud-p').textContent = P.toFixed(2)+' W';
+  }
+
+  function updateCalc(c){
+    let text;
+    if(state.mode==='seri'){
+      text = `Seri: R total = R1 + R2 = <b class="mono">${state.R1} + ${state.R2} = ${c.Rtotal.toFixed(1)} Ω</b><br>` +
+        `I total = V ÷ R total = <b class="mono">${state.V} ÷ ${c.Rtotal.toFixed(1)} = ${c.Itotal.toFixed(2)} A</b> (mengalir sama di R1 dan R2)<br>` +
+        `V1 = I·R1 = <b class="mono">${c.V1.toFixed(2)} V</b> · V2 = I·R2 = <b class="mono">${c.V2.toFixed(2)} V</b>`;
+    } else {
+      text = `Paralel: 1/R total = 1/R1 + 1/R2 → R total = <b class="mono">${c.Rtotal.toFixed(2)} Ω</b><br>` +
+        `V1 = V2 = V baterai = <b class="mono">${state.V} V</b> (sama di kedua lampu)<br>` +
+        `I1 = V÷R1 = <b class="mono">${c.I1.toFixed(2)} A</b> · I2 = V÷R2 = <b class="mono">${c.I2.toFixed(2)} A</b> · I total = <b class="mono">${c.Itotal.toFixed(2)} A</b>`;
+    }
+    document.getElementById('calc-box').innerHTML = text;
+
+    const note = document.getElementById('insight-note');
+    if(state.mode==='seri'){
+      note.textContent = state.R1===state.R2
+        ? "Karena R1 = R2 dan arus di rangkaian seri selalu sama, kedua lampu menyala sama terang."
+        : "Pada rangkaian seri, arus di R1 dan R2 selalu sama besar — tapi tegangan (dan keterangan lampu) berbeda karena hambatannya berbeda.";
+    } else {
+      note.textContent = state.R1===state.R2
+        ? "Karena R1 = R2 dan tegangan di rangkaian paralel selalu sama, kedua lampu menyala sama terang."
+        : "Pada rangkaian paralel, tegangan di R1 dan R2 selalu sama besar — tapi arus berbeda karena hambatannya berbeda, sehingga terangnya juga berbeda.";
+    }
+  }
+
+  function refresh(){
+    const c = compute();
+    updateReadouts(c);
+    updateCalc(c);
+    drawScene(c);
+    drawBars(c);
+  }
+
+  // ---------- DRAWING ----------
+  function bulbGlowRadius(P){ return 14 + Math.min(46, P*3.2); }
+
+  function drawScene(c){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#f7f9ff'; ctx.fillRect(0,0,W,H);
+    drawGrid();
+
+    if(state.mode==='seri'){
+      // single loop: battery(left) -> top wire -> R1 -> R2 -> right wire -> bottom -> back
+      const left=120, right=780, top=90, bottom=280;
+      drawWireLoop(left,right,top,bottom, c.Itotal);
+      drawBattery(left, (top+bottom)/2);
+      const r1x = left + (right-left)*0.38, r2x = left + (right-left)*0.68;
+      drawBulb(r1x, top, c.P1, 'R1='+state.R1+'Ω', state.target==='r1');
+      drawBulb(r2x, top, c.P2, 'R2='+state.R2+'Ω', state.target==='r2');
+    } else {
+      // two parallel branches
+      const left=120, right=780, top=80, mid=180, bottom=280;
+      drawBattery(left, (top+bottom)/2);
+      // main verticals
+      ctx.strokeStyle = '#5b6178'; ctx.lineWidth=6; ctx.lineJoin='round';
+      ctx.beginPath();
+      ctx.moveTo(left,(top+bottom)/2-40); ctx.lineTo(left,top); ctx.lineTo(right,top);
+      ctx.moveTo(left,(top+bottom)/2+40); ctx.lineTo(left,bottom); ctx.lineTo(right,bottom);
+      ctx.moveTo(right,top); ctx.lineTo(right,bottom);
+      // two branch verticals with bulbs
+      const b1x = left+(right-left)*0.42, b2x=left+(right-left)*0.72;
+      ctx.moveTo(b1x, top); ctx.lineTo(b1x, bottom);
+      ctx.moveTo(b2x, top); ctx.lineTo(b2x, bottom);
+      ctx.stroke();
+      drawBulb(b1x, (top+bottom)/2, c.P1, 'R1='+state.R1+'Ω', state.target==='r1', true);
+      drawBulb(b2x, (top+bottom)/2, c.P2, 'R2='+state.R2+'Ω', state.target==='r2', true);
+    }
+  }
+
+  function drawGrid(){
+    ctx.strokeStyle = '#dde2f5'; ctx.lineWidth=1;
+    for(let x=0;x<W;x+=24){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for(let y=0;y<H;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  }
+
+  function drawWireLoop(left,right,top,bottom,current){
+    ctx.strokeStyle = '#5b6178'; ctx.lineWidth=6; ctx.lineJoin='round';
+    ctx.beginPath();
+    ctx.moveTo(left,top); ctx.lineTo(right,top);
+    ctx.lineTo(right,bottom); ctx.lineTo(left,bottom); ctx.lineTo(left,top);
+    ctx.stroke();
+
+    state.flowPhase += 2 + current*3;
+    ctx.fillStyle = '#f5a524';
+    const totalLen = 2*(right-left)+2*(bottom-top);
+    const gap=30;
+    for(let d=state.flowPhase%gap; d<totalLen; d+=gap){
+      const pt = ptOnRect(d,left,right,top,bottom);
+      ctx.beginPath(); ctx.arc(pt.x,pt.y,4,0,Math.PI*2); ctx.fill();
+    }
+  }
+  function ptOnRect(d,left,right,top,bottom){
+    const segTop=right-left, segR=bottom-top, segBot=right-left, segL=bottom-top;
+    if(d<segTop) return {x:left+d,y:top};
+    d-=segTop; if(d<segR) return {x:right,y:top+d};
+    d-=segR; if(d<segBot) return {x:right-d,y:bottom};
+    d-=segBot; return {x:left,y:bottom-d};
+  }
+
+  function drawBattery(x,y){
+    ctx.save(); ctx.translate(x,y);
+    ctx.fillStyle='#ffd23f'; ctx.strokeStyle='#2b2d42'; ctx.lineWidth=3;
+    ctx.fillRect(-22,-40,44,80); ctx.strokeRect(-22,-40,44,80);
+    ctx.fillStyle='#2b2d42'; ctx.font='bold 14px Inter'; ctx.textAlign='center';
+    ctx.fillText('+', 0,-14); ctx.fillText(state.V+'V', 0, 6); ctx.fillText('−', 0, 26);
+    ctx.restore();
+  }
+
+  function drawBulb(x,y,P,labelBelow,active,vertical){
+    ctx.save(); ctx.translate(x,y);
+    const glowR = bulbGlowRadius(P);
+    if(P>0.02){
+      const grad = ctx.createRadialGradient(0,0,4,0,0,glowR);
+      grad.addColorStop(0,'rgba(255,210,63,0.9)');
+      grad.addColorStop(1,'rgba(255,210,63,0)');
+      ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(0,0,glowR,0,Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle = P>0.02 ? '#ffd23f' : '#e6e8f2';
+    ctx.strokeStyle = active ? '#2f5fe0' : '#5b6178';
+    ctx.lineWidth = active ? 4 : 3;
+    ctx.beginPath(); ctx.arc(0,0,20,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#111a3c'; ctx.font='bold 11px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText(labelBelow, 0, vertical? 46: 46);
+    ctx.restore();
+  }
+
+  // click to select component
+  canvas.addEventListener('click', e=>{
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W/rect.width, scaleY = H/rect.height;
+    const mx = (e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+    let r1Pos, r2Pos;
+    if(state.mode==='seri'){
+      const left=120, right=780, top=90;
+      r1Pos = {x:left+(right-left)*0.38, y:top};
+      r2Pos = {x:left+(right-left)*0.68, y:top};
+    } else {
+      const left=120, right=780, top=80, bottom=280;
+      r1Pos = {x:left+(right-left)*0.42, y:(top+bottom)/2};
+      r2Pos = {x:left+(right-left)*0.72, y:(top+bottom)/2};
+    }
+    const d1 = Math.hypot(mx-r1Pos.x,my-r1Pos.y), d2=Math.hypot(mx-r2Pos.x,my-r2Pos.y);
+    if(Math.min(d1,d2) < 30){
+      const target = d1<d2 ? 'r1':'r2';
+      state.target = target;
+      document.querySelectorAll('.meter-btn').forEach(b=>b.classList.toggle('selected', b.dataset.target===target));
+      refresh();
+    }
+  });
+
+  function drawBars(c){
+    plotBar(barICtx, barICanvas, [['R1',c.I1],['R2',c.I2]], '#2f6fed', 'A');
+    plotBar(barVCtx, barVCanvas, [['R1',c.V1],['R2',c.V2]], '#f5a524', 'V');
+  }
+  function plotBar(c,cv,data,color,unit){
+    const w=cv.width,h=cv.height;
+    c.clearRect(0,0,w,h);
+    const maxV = Math.max(0.5, ...data.map(d=>d[1]))*1.25;
+    const barW = 70, gap=(w-2*barW)/3;
+    data.forEach((d,i)=>{
+      const bh = (d[1]/maxV)*(h-30);
+      const x = gap + i*(barW+gap);
+      c.fillStyle = color;
+      c.fillRect(x, h-20-bh, barW, bh);
+      c.fillStyle = '#111a3c'; c.font='bold 11px JetBrains Mono'; c.textAlign='center';
+      c.fillText(d[0], x+barW/2, h-6);
+      c.fillText(d[1].toFixed(2)+unit, x+barW/2, h-24-bh<10?12:h-24-bh);
+    });
+  }
+
+  refresh();
+})();
+</script>
+</body>
+</html>

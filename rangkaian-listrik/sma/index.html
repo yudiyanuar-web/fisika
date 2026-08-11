@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rangkaian Campuran & Hukum Kirchhoff - SMA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef1f5; --ink:#161c26; --muted:#5c6478; --card:#ffffff;
+    --console:#161c26; --console-text:#e8ecf5; --console-dim:#8891ab;
+    --gold:#b8912c; --purple:#7c5cff; --green:#1f9d63; --red:#e2493d; --blue:#2f6fed;
+    --radius:16px; --shadow:0 12px 28px rgba(22,28,38,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;padding-bottom:40px;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header.top{max-width:1180px;margin:0 auto;padding:22px 20px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{width:48px;height:48px;border-radius:10px;background:var(--console);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold);box-shadow:var(--shadow);}
+  .brand h1{font-size:22px;margin:0;line-height:1.15;font-weight:600;}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:600;}
+  .level-track{display:flex;gap:8px;}
+  .level-pill{font-size:13px;padding:7px 14px;border-radius:999px;font-weight:700;border:2px solid transparent;}
+  .level-pill.done{background:#e7f7ee;color:#1c8a52;border-color:#bfe9d3;text-decoration:none;cursor:pointer;}
+  .level-pill.done:hover{border-color:#1c8a52;}
+  .level-pill.active{background:var(--console);color:var(--gold);}
+  .breadcrumb{max-width:1180px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096a8;}
+  .breadcrumb a{color:var(--muted);text-decoration:none;}
+  .breadcrumb a:hover{color:var(--gold);text-decoration:underline;}
+
+  main{max-width:1180px;margin:0 auto;padding:8px 20px;}
+  .layout{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:920px){ .layout{grid-template-columns:1fr;} }
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .scene-wrap{position:relative;border-radius:12px;overflow:hidden;background:#fbfbfd;border:1px solid #e3e6ef;}
+  canvas#scene{display:block;width:100%;height:auto;cursor:pointer;}
+
+  .meter-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .meter-btn{flex:1;min-width:90px;border:2px solid #e3e6ef;background:#fbfcff;border-radius:10px;padding:8px 4px;font-weight:700;font-size:12px;cursor:pointer;}
+  .meter-btn.selected{border-color:var(--gold);background:#fbf3df;color:#8a6a10;}
+
+  .console{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;background:var(--console);border-radius:12px;padding:12px 14px;}
+  .console .readout{flex:1;min-width:90px;}
+  .console .readout .l{font-size:10px;color:var(--console-dim);letter-spacing:.4px;text-transform:uppercase;font-weight:700;}
+  .console .readout .v{font-size:17px;color:var(--console-text);font-weight:600;}
+
+  .bars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  .bar-card{background:var(--paper);border-radius:10px;padding:10px 10px 4px;}
+  .bar-card h4{margin:0 0 4px 2px;font-size:11.5px;color:var(--muted);font-weight:700;}
+  canvas.bar{display:block;width:100%;height:100px;}
+  @media (max-width:560px){ .bars{grid-template-columns:1fr;} }
+
+  .card h3{margin:0 0 10px;font-size:16px;font-weight:600;}
+  .field{margin-bottom:16px;}
+  .field .row-label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;}
+  .field .row-label span.val{color:var(--gold);font-family:'IBM Plex Mono';}
+  input[type=range]{width:100%;accent-color:var(--gold);}
+
+  .theory-box{background:var(--paper);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12.8px;line-height:1.85;}
+  .theory-box b.mono{color:var(--gold);}
+  .kirchhoff{background:#eef3ff;border:1px solid #d3d9ff;border-radius:10px;padding:10px 12px;margin-top:12px;font-size:12.8px;font-weight:600;color:#2b3a8f;line-height:1.7;}
+
+  .energy-box{background:#fbf3df;border:1px solid #eddba9;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:13px;}
+  .energy-box .row-label{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;margin-bottom:6px;}
+  .energy-box .val{color:#8a6a10;font-family:'IBM Plex Mono';}
+  .energy-result{margin-top:8px;font-size:13px;line-height:1.7;}
+  .energy-result b{color:#8a6a10;}
+
+  table.history{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px;}
+  table.history th,table.history td{padding:5px 3px;text-align:center;border-bottom:1px solid #eef0fa;}
+  table.history th{color:var(--muted);font-size:9.5px;text-transform:uppercase;}
+  .empty-row td{color:#b7bad2;font-style:italic;padding:14px 0;}
+  .reset-btn{width:100%;padding:10px;border-radius:10px;border:2px solid #e3e6ef;background:#fff;font-weight:800;color:var(--muted);cursor:pointer;margin-top:10px;}
+
+  details.help{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-top:18px;}
+  details.help + details.help{margin-top:12px;}
+  details.help summary{font-family:'Fraunces';font-size:16px;cursor:pointer;list-style:none;font-weight:600;}
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--gold);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol,details.help ul{padding-left:20px;line-height:1.8;}
+
+  footer{max-width:1180px;margin:26px auto 0;padding:0 20px;font-size:12px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Rangkaian Listrik</a> › <b>SMA</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">⚡</div>
+    <div>
+      <h1>Rangkaian Campuran &amp; Hukum Kirchhoff</h1>
+      <p>Simulasi Fisika Interaktif — Seri 3 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <a class="level-pill done" href="../sd/index.html">← SD</a>
+    <a class="level-pill done" href="../smp/index.html">← SMP</a>
+    <span class="level-pill active">SMA</span>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <div class="card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="380"></canvas>
+      </div>
+
+      <div class="meter-row">
+        <button class="meter-btn selected" data-target="r1">🔍 R1</button>
+        <button class="meter-btn" data-target="r2">🔍 R2</button>
+        <button class="meter-btn" data-target="r3">🔍 R3</button>
+        <button class="meter-btn" data-target="total">🔍 Total</button>
+      </div>
+
+      <div class="console">
+        <div class="readout"><div class="l">Tegangan (V)</div><div class="v mono" id="hud-v">0.0 V</div></div>
+        <div class="readout"><div class="l">Arus (I)</div><div class="v mono" id="hud-i">0.00 A</div></div>
+        <div class="readout"><div class="l">Hambatan (R)</div><div class="v mono" id="hud-r">0 Ω</div></div>
+        <div class="readout"><div class="l">Daya (P)</div><div class="v mono" id="hud-p">0.00 W</div></div>
+      </div>
+
+      <div class="bars">
+        <div class="bar-card"><h4>Arus tiap Cabang (A)</h4><canvas class="bar" id="bar-i" width="420" height="100"></canvas></div>
+        <div class="bar-card"><h4>Tegangan tiap Komponen (V)</h4><canvas class="bar" id="bar-v" width="420" height="100"></canvas></div>
+      </div>
+
+      <div class="kirchhoff" id="kirchhoff-box"></div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>⚙️ Pengaturan Rangkaian</h3>
+        <p style="font-size:12.5px;color:var(--muted);margin-top:-4px;">R1 tersusun seri, kemudian bercabang paralel menjadi R2 dan R3.</p>
+
+        <div class="field">
+          <div class="row-label"><span>Tegangan Sumber (V)</span><span class="val mono" id="v-val">12 V</span></div>
+          <input type="range" id="v-slider" min="2" max="24" step="1" value="12">
+        </div>
+        <div class="field">
+          <div class="row-label"><span>R1 (seri)</span><span class="val mono" id="r1-val">4 Ω</span></div>
+          <input type="range" id="r1-slider" min="1" max="20" step="1" value="4">
+        </div>
+        <div class="field">
+          <div class="row-label"><span>R2 (paralel)</span><span class="val mono" id="r2-val">6 Ω</span></div>
+          <input type="range" id="r2-slider" min="1" max="20" step="1" value="6">
+        </div>
+        <div class="field">
+          <div class="row-label"><span>R3 (paralel)</span><span class="val mono" id="r3-val">12 Ω</span></div>
+          <input type="range" id="r3-slider" min="1" max="20" step="1" value="12">
+        </div>
+
+        <button class="reset-btn" id="reset-btn">↺ Catat Konfigurasi Ini</button>
+
+        <div class="theory-box" id="calc-box"></div>
+
+        <div class="energy-box">
+          <h3 style="margin-bottom:8px;">💡 Kalkulator Energi Listrik</h3>
+          <div class="row-label"><span>Lama Pemakaian</span><span class="val mono" id="t-val">5 jam</span></div>
+          <input type="range" id="t-slider" min="1" max="24" step="1" value="5">
+          <div class="row-label" style="margin-top:8px;"><span>Tarif Listrik (asumsi)</span><span class="val mono">Rp 1.500 / kWh</span></div>
+          <div class="energy-result" id="energy-result"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📒 Catatan Percobaan</h3>
+        <table class="history">
+          <thead><tr><th>No</th><th>V</th><th>R1</th><th>R2</th><th>R3</th><th>R total</th><th>I total</th></tr></thead>
+          <tbody id="history-body"><tr class="empty-row"><td colspan="7">Tekan "Catat Konfigurasi Ini" untuk menyimpan data.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Atur tegangan sumber (V) dan nilai ketiga hambatan: R1 (seri), R2 dan R3 (paralel).</li>
+      <li>Klik komponen pada gambar rangkaian, atau tombol R1/R2/R3/Total, untuk membaca V, I, R, P seperti multimeter.</li>
+      <li>Perhatikan kotak <b>Verifikasi Hukum Kirchhoff</b>: apakah I1 = I2 + I3 (Hukum I Kirchhoff / KCL) selalu terpenuhi?</li>
+      <li>Gunakan <b>Kalkulator Energi Listrik</b> untuk menghitung energi (kWh) dan perkiraan biaya listrik dari rangkaian ini jika dipakai selama beberapa jam.</li>
+      <li>Catat beberapa konfigurasi berbeda ke tabel, lalu bandingkan di LKS.</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> analisis rangkaian campuran (seri-paralel), Hukum I Kirchhoff (ΣI masuk = ΣI keluar di suatu titik cabang), Hukum II Kirchhoff secara implisit (V = V1 + V23), dan perhitungan energi listrik (W = P·t) beserta konversi ke kWh dan estimasi biaya.</li>
+      <li><b>Alur yang disarankan:</b> minta siswa menghitung manual R23, R total, dan I total terlebih dahulu di atas kertas, baru memverifikasi jawabannya dengan simulasi.</li>
+      <li><b>Poin verifikasi Kirchhoff:</b> tunjukkan bahwa I1 (arus dari sumber) selalu sama dengan I2+I3 pada kotak verifikasi otomatis, sebagai bukti empiris Hukum I Kirchhoff.</li>
+      <li><b>Ekstensi:</b> kalkulator energi listrik dapat dipakai untuk mendiskusikan efisiensi energi dan cara membaca tagihan listrik rumah tangga (kWh meter).</li>
+      <li>LKS pendamping ada di folder <code>worksheet/</code>, panduan lengkap di <code>README.md</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SMA · Topik: Rangkaian Campuran, Hukum Kirchhoff, Energi &amp; Daya Listrik.</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const barICanvas = document.getElementById('bar-i');
+  const barVCanvas = document.getElementById('bar-v');
+  const barICtx = barICanvas.getContext('2d');
+  const barVCtx = barVCanvas.getContext('2d');
+
+  let state = { V:12, R1:4, R2:6, R3:12, target:'r1', attempt:0, flowPhase:0, tHours:5 };
+
+  function compute(){
+    const {V,R1,R2,R3} = state;
+    const R23 = (R2*R3)/(R2+R3);
+    const Rtotal = R1+R23;
+    const I1 = V/Rtotal;
+    const V1 = I1*R1;
+    const V23 = I1*R23;
+    const I2 = V23/R2, I3 = V23/R3;
+    const P1=I1*I1*R1, P2=I2*I2*R2, P3=I3*I3*R3, Ptotal=V*I1;
+    return {R23,Rtotal,I1,V1,V23,I2,I3,P1,P2,P3,Ptotal};
+  }
+
+  ['v','r1','r2','r3'].forEach(key=>{
+    const slider = document.getElementById(key+'-slider');
+    slider.addEventListener('input', ()=>{
+      state[key.toUpperCase()] = +slider.value;
+      document.getElementById(key+'-val').textContent = slider.value + (key==='v' ? ' V' : ' Ω');
+      refresh();
+    });
+  });
+  document.getElementById('t-slider').addEventListener('input', e=>{
+    state.tHours = +e.target.value;
+    document.getElementById('t-val').textContent = state.tHours+' jam';
+    refresh();
+  });
+
+  document.querySelectorAll('.meter-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.meter-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.target = btn.dataset.target;
+      refresh();
+    });
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', ()=>{
+    const c = compute();
+    state.attempt++;
+    const tbody = document.getElementById('history-body');
+    const empty = tbody.querySelector('.empty-row');
+    if(empty) empty.remove();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${state.attempt}</td><td>${state.V}</td><td>${state.R1}</td><td>${state.R2}</td><td>${state.R3}</td><td>${c.Rtotal.toFixed(2)}</td><td>${c.I1.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  function updateReadouts(c){
+    let V,I,R,P;
+    if(state.target==='r1'){ V=c.V1; I=c.I1; R=state.R1; P=c.P1; }
+    else if(state.target==='r2'){ V=c.V23; I=c.I2; R=state.R2; P=c.P2; }
+    else if(state.target==='r3'){ V=c.V23; I=c.I3; R=state.R3; P=c.P3; }
+    else { V=state.V; I=c.I1; R=c.Rtotal; P=c.Ptotal; }
+    document.getElementById('hud-v').textContent = V.toFixed(2)+' V';
+    document.getElementById('hud-i').textContent = I.toFixed(2)+' A';
+    document.getElementById('hud-r').textContent = R.toFixed(2)+' Ω';
+    document.getElementById('hud-p').textContent = P.toFixed(2)+' W';
+  }
+
+  function updateCalc(c){
+    document.getElementById('calc-box').innerHTML =
+      `R23 (paralel) = (R2×R3)/(R2+R3) = <b class="mono">${c.R23.toFixed(2)} Ω</b><br>` +
+      `R total = R1 + R23 = <b class="mono">${state.R1} + ${c.R23.toFixed(2)} = ${c.Rtotal.toFixed(2)} Ω</b><br>` +
+      `I1 (arus total) = V ÷ R total = <b class="mono">${c.I1.toFixed(2)} A</b><br>` +
+      `V1 = I1×R1 = <b class="mono">${c.V1.toFixed(2)} V</b> · V23 = V − V1 = <b class="mono">${c.V23.toFixed(2)} V</b><br>` +
+      `I2 = V23÷R2 = <b class="mono">${c.I2.toFixed(2)} A</b> · I3 = V23÷R3 = <b class="mono">${c.I3.toFixed(2)} A</b>`;
+
+    const sumI = c.I2+c.I3;
+    document.getElementById('kirchhoff-box').innerHTML =
+      `<b>Verifikasi Hukum I Kirchhoff (KCL):</b> I1 = I2 + I3 → ` +
+      `${c.I1.toFixed(2)} A = ${c.I2.toFixed(2)} + ${c.I3.toFixed(2)} = ${sumI.toFixed(2)} A ` +
+      (Math.abs(c.I1-sumI)<0.01 ? '✅ Terpenuhi!' : '');
+
+    const energyWh = c.Ptotal * state.tHours;
+    const energyKwh = energyWh/1000;
+    const cost = energyKwh*1500;
+    document.getElementById('energy-result').innerHTML =
+      `Energi = P × t = <b>${c.Ptotal.toFixed(1)} W × ${state.tHours} jam = ${energyKwh.toFixed(3)} kWh</b><br>` +
+      `Perkiraan biaya = <b>Rp ${Math.round(cost).toLocaleString('id-ID')}</b>`;
+  }
+
+  function refresh(){
+    const c = compute();
+    updateReadouts(c);
+    updateCalc(c);
+    drawScene(c);
+    drawBars(c);
+  }
+
+  // ---------- DRAWING ----------
+  const coords = {
+    battX:100, left:150, r1x1:200, r1x2:340, nodeAx:400, nodeBx:660, right:780,
+    topY:90, branch2Y:60, branch3Y:150, bottomY:290
+  };
+
+  function drawScene(c){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#fbfbfd'; ctx.fillRect(0,0,W,H);
+    drawGrid();
+
+    const {battX,left,r1x1,r1x2,nodeAx,nodeBx,right,topY,branch2Y,branch3Y,bottomY} = coords;
+
+    ctx.strokeStyle='#5b6178'; ctx.lineWidth=5; ctx.lineJoin='round'; ctx.lineCap='round';
+    ctx.beginPath();
+    // battery to top wire
+    ctx.moveTo(battX,topY); ctx.lineTo(left,topY);
+    // through R1 handled separately (gap)
+    ctx.moveTo(r1x2,topY); ctx.lineTo(nodeAx,topY);
+    // node A vertical splits
+    ctx.moveTo(nodeAx,topY); ctx.lineTo(nodeAx,branch2Y); ctx.lineTo(nodeAx+20,branch2Y);
+    ctx.moveTo(nodeAx,topY); ctx.lineTo(nodeAx,branch3Y); ctx.lineTo(nodeAx+20,branch3Y);
+    // branch ends to node B
+    ctx.moveTo(nodeBx-20,branch2Y); ctx.lineTo(nodeBx,branch2Y); ctx.lineTo(nodeBx,topY);
+    ctx.moveTo(nodeBx-20,branch3Y); ctx.lineTo(nodeBx,branch3Y); ctx.lineTo(nodeBx,topY);
+    // node B to right, down, bottom, back to battery
+    ctx.moveTo(nodeBx,topY); ctx.lineTo(right,topY); ctx.lineTo(right,bottomY);
+    ctx.lineTo(battX,bottomY); ctx.lineTo(battX,topY+ 0);
+    ctx.stroke();
+
+    // flow dots on main + branches (approximate)
+    state.flowPhase += 2 + c.I1*2.5;
+    drawFlowDots(left,topY,r1x1,topY, c.I1);
+    drawFlowDots(nodeAx+20,branch2Y,nodeBx-20,branch2Y, c.I2);
+    drawFlowDots(nodeAx+20,branch3Y,nodeBx-20,branch3Y, c.I3);
+    drawFlowDots(right,topY,right,bottomY, c.I1);
+
+    drawBattery(battX, (topY+bottomY)/2);
+    drawResistorBox(r1x1, topY, r1x2, topY, 'R1', state.R1, state.target==='r1');
+    drawResistorBox(nodeAx+20, branch2Y, nodeBx-20, branch2Y, 'R2', state.R2, state.target==='r2');
+    drawResistorBox(nodeAx+20, branch3Y, nodeBx-20, branch3Y, 'R3', state.R3, state.target==='r3');
+  }
+
+  function drawGrid(){
+    ctx.strokeStyle='#eef0f8'; ctx.lineWidth=1;
+    for(let x=0;x<W;x+=24){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for(let y=0;y<H;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  }
+
+  function drawFlowDots(x1,y1,x2,y2,current){
+    const len = Math.hypot(x2-x1,y2-y1);
+    const gap=28;
+    ctx.fillStyle = '#b8912c';
+    for(let d=state.flowPhase%gap; d<len; d+=gap){
+      const t=d/len;
+      const x=x1+(x2-x1)*t, y=y1+(y2-y1)*t;
+      ctx.beginPath(); ctx.arc(x,y,3.4,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  function drawBattery(x,y){
+    ctx.save(); ctx.translate(x,y);
+    ctx.fillStyle='#fdf1cf'; ctx.strokeStyle='#161c26'; ctx.lineWidth=3;
+    ctx.fillRect(-20,-100,40,200); ctx.strokeRect(-20,-100,40,200);
+    ctx.fillStyle='#161c26'; ctx.font='bold 13px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText('+', 0,-70); ctx.fillText(state.V+'V', 0, 6); ctx.fillText('−', 0, 80);
+    ctx.restore();
+  }
+
+  function drawResistorBox(x1,y1,x2,y2,label,val,active){
+    const midx=(x1+x2)/2, midy=(y1+y2)/2;
+    ctx.save();
+    ctx.fillStyle = active ? '#fbf3df' : '#fff';
+    ctx.strokeStyle = active ? '#b8912c' : '#5b6178';
+    ctx.lineWidth = active ? 3.5 : 2.5;
+    const bw=Math.max(60,Math.abs(x2-x1)-10), bh=26;
+    ctx.fillRect(midx-bw/2, midy-bh/2, bw, bh);
+    ctx.strokeRect(midx-bw/2, midy-bh/2, bw, bh);
+    ctx.fillStyle = active ? '#8a6a10' : '#161c26';
+    ctx.font='bold 12px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText(label+' = '+val+'Ω', midx, midy+4);
+    ctx.restore();
+  }
+
+  // click to select
+  canvas.addEventListener('click', e=>{
+    const rect = canvas.getBoundingClientRect();
+    const scaleX=W/rect.width, scaleY=H/rect.height;
+    const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+    const {r1x1,r1x2,nodeAx,nodeBx,topY,branch2Y,branch3Y} = coords;
+    const zones = [
+      {t:'r1', x:(r1x1+r1x2)/2, y:topY},
+      {t:'r2', x:(nodeAx+20+nodeBx-20)/2, y:branch2Y},
+      {t:'r3', x:(nodeAx+20+nodeBx-20)/2, y:branch3Y},
+    ];
+    let best=null, bestD=999;
+    zones.forEach(z=>{ const d=Math.hypot(mx-z.x,my-z.y); if(d<bestD){bestD=d; best=z;} });
+    if(best && bestD<50){
+      state.target=best.t;
+      document.querySelectorAll('.meter-btn').forEach(b=>b.classList.toggle('selected', b.dataset.target===best.t));
+      refresh();
+    }
+  });
+
+  function drawBars(c){
+    plotBar(barICtx, barICanvas, [['I1',c.I1],['I2',c.I2],['I3',c.I3]], '#2f6fed', 'A');
+    plotBar(barVCtx, barVCanvas, [['V1',c.V1],['V2',c.V23],['V3',c.V23]], '#b8912c', 'V');
+  }
+  function plotBar(c,cv,data,color,unit){
+    const w=cv.width,h=cv.height;
+    c.clearRect(0,0,w,h);
+    const maxV = Math.max(0.5, ...data.map(d=>d[1]))*1.25;
+    const barW=56, gap=(w-3*barW)/4;
+    data.forEach((d,i)=>{
+      const bh=(d[1]/maxV)*(h-30);
+      const x=gap+i*(barW+gap);
+      c.fillStyle=color;
+      c.fillRect(x,h-20-bh,barW,bh);
+      c.fillStyle='#161c26'; c.font='bold 10px IBM Plex Mono'; c.textAlign='center';
+      c.fillText(d[0], x+barW/2, h-6);
+      c.fillText(d[1].toFixed(2), x+barW/2, (h-24-bh)<10?12:h-24-bh);
+    });
+  }
+
+  let lastTs=null;
+  function loop(){
+    const c = compute();
+    drawScene(c);
+    requestAnimationFrame(loop);
+  }
+
+  refresh();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
