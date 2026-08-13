@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asas Black - SMA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef1f5; --ink:#161c26; --muted:#5c6478; --card:#ffffff;
+    --console:#161c26; --console-text:#e8ecf5; --console-dim:#8891ab;
+    --gold:#b8912c; --purple:#7c5cff; --green:#1f9d63; --red:#e2493d; --blue:#2f6fed;
+    --radius:16px; --shadow:0 12px 28px rgba(22,28,38,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;padding-bottom:40px;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  .breadcrumb{max-width:1180px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096a8;}
+  .breadcrumb a{color:var(--muted);text-decoration:none;}
+  .breadcrumb a:hover{color:var(--gold);text-decoration:underline;}
+
+  header.top{max-width:1180px;margin:0 auto;padding:12px 20px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{width:48px;height:48px;border-radius:10px;background:var(--console);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold);box-shadow:var(--shadow);}
+  .brand h1{font-size:22px;margin:0;line-height:1.15;font-weight:600;}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:600;}
+  .level-track{display:flex;gap:8px;}
+  .level-pill{font-size:13px;padding:7px 14px;border-radius:999px;font-weight:700;border:2px solid transparent;}
+  .level-pill.done{background:#e7f7ee;color:#1c8a52;border-color:#bfe9d3;text-decoration:none;cursor:pointer;}
+  .level-pill.done:hover{border-color:#1c8a52;}
+  .level-pill.active{background:var(--console);color:var(--gold);}
+
+  main{max-width:1180px;margin:0 auto;padding:8px 20px;}
+  .layout{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:920px){ .layout{grid-template-columns:1fr;} }
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .scene-wrap{position:relative;border-radius:12px;overflow:hidden;background:#fbfbfd;border:1px solid #e3e6ef;}
+  canvas#scene{display:block;width:100%;height:auto;}
+
+  .console{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;background:var(--console);border-radius:12px;padding:12px 14px;}
+  .console .readout{flex:1;min-width:88px;}
+  .console .readout .l{font-size:10px;color:var(--console-dim);letter-spacing:.4px;text-transform:uppercase;font-weight:700;}
+  .console .readout .v{font-size:16px;color:var(--console-text);font-weight:600;}
+
+  .card h3{margin:0 0 10px;font-size:16px;font-weight:600;}
+  .field{margin-bottom:14px;}
+  .field .row-label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;}
+  .field .row-label span.val{color:var(--gold);font-family:'IBM Plex Mono';}
+  input[type=range]{width:100%;accent-color:var(--gold);}
+
+  .subhead{font-weight:700;font-size:13px;margin:14px 0 8px;padding-top:10px;border-top:1px solid #eef0f8;}
+  .subhead.a{color:var(--red);} .subhead.b{color:var(--blue);}
+
+  .choice-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .choice-btn{flex:1;min-width:78px;border:2px solid #e3e6ef;background:#fbfbfd;border-radius:9px;padding:7px 4px;font-weight:700;font-size:11.5px;color:var(--ink);cursor:pointer;text-align:center;}
+  .choice-btn small{display:block;color:var(--muted);font-weight:600;font-family:'IBM Plex Mono';font-size:9.5px;}
+  .choice-btn.selected{border-color:var(--gold);background:#fbf3df;color:#8a6a10;}
+
+  .theory-box{background:var(--paper);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12.8px;line-height:1.85;}
+  .theory-box b.mono{color:var(--gold);}
+
+  table.history{width:100%;border-collapse:collapse;font-size:11.2px;margin-top:6px;}
+  table.history th,table.history td{padding:5px 3px;text-align:center;border-bottom:1px solid #eef0fa;}
+  table.history th{color:var(--muted);font-size:9.2px;text-transform:uppercase;}
+  .empty-row td{color:#b7bad2;font-style:italic;padding:14px 0;}
+  .reset-btn{width:100%;padding:10px;border-radius:10px;border:2px solid #e3e6ef;background:#fff;font-weight:800;color:var(--muted);cursor:pointer;margin-top:10px;}
+
+  details.help{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-top:18px;}
+  details.help + details.help{margin-top:12px;}
+  details.help summary{font-family:'Fraunces';font-size:16px;cursor:pointer;list-style:none;font-weight:600;}
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--gold);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol,details.help ul{padding-left:20px;line-height:1.8;}
+
+  footer{max-width:1180px;margin:26px auto 0;padding:0 20px;font-size:12px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Kalor &amp; Perpindahan Panas</a> › <b>SMA</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">♨️</div>
+    <div>
+      <h1>Asas Black</h1>
+      <p>Simulasi Fisika Interaktif — Seri 3 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <a class="level-pill done" href="../sd/index.html">← SD</a>
+    <a class="level-pill done" href="../smp/index.html">← SMP</a>
+    <span class="level-pill active">SMA</span>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <div class="card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="360"></canvas>
+      </div>
+
+      <div class="console">
+        <div class="readout"><div class="l">Suhu Benda A</div><div class="v mono" id="hud-ta">150.0 °C</div></div>
+        <div class="readout"><div class="l">Suhu Benda B (Air)</div><div class="v mono" id="hud-tb">20.0 °C</div></div>
+        <div class="readout"><div class="l">Suhu Akhir (Tc)</div><div class="v mono" id="hud-tc">—</div></div>
+        <div class="readout"><div class="l">Waktu</div><div class="v mono" id="hud-time">0.0 s</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>⚙️ Pengaturan Percobaan</h3>
+        <p style="font-size:12px;color:var(--muted);margin-top:-6px;">Benda A (panas) dicelupkan ke dalam Benda B (air dingin) dalam wadah terisolasi.</p>
+
+        <div class="subhead a">🔴 Benda A</div>
+        <div class="choice-row" id="matA-row">
+          <button class="choice-btn selected" data-c="450" data-label="Besi">Besi<small>c=450</small></button>
+          <button class="choice-btn" data-c="900" data-label="Aluminium">Aluminium<small>c=900</small></button>
+          <button class="choice-btn" data-c="390" data-label="Tembaga">Tembaga<small>c=390</small></button>
+          <button class="choice-btn" data-c="130" data-label="Timah">Timah<small>c=130</small></button>
+        </div>
+        <div class="field">
+          <div class="row-label"><span>Massa A</span><span class="val mono" id="ma-val">0.5 kg</span></div>
+          <input type="range" id="ma-slider" min="0.1" max="2" step="0.1" value="0.5">
+        </div>
+        <div class="field">
+          <div class="row-label"><span>Suhu Awal A</span><span class="val mono" id="tA0-val">150 °C</span></div>
+          <input type="range" id="tA0-slider" min="50" max="200" step="5" value="150">
+        </div>
+
+        <div class="subhead b">🔵 Benda B (Air)</div>
+        <div class="field">
+          <div class="row-label"><span>Massa Air (B)</span><span class="val mono" id="mb-val">1.0 kg</span></div>
+          <input type="range" id="mb-slider" min="0.1" max="2" step="0.1" value="1.0">
+        </div>
+        <div class="field">
+          <div class="row-label"><span>Suhu Awal B</span><span class="val mono" id="tB0-val">20 °C</span></div>
+          <input type="range" id="tB0-slider" min="0" max="40" step="1" value="20">
+        </div>
+
+        <button class="reset-btn" id="play-btn">▶️ Mulai Pencampuran</button>
+        <button class="reset-btn" id="log-btn">📒 Catat Konfigurasi Ini</button>
+
+        <div class="theory-box" id="calc-box"></div>
+      </div>
+
+      <div class="card">
+        <h3>📒 Catatan Percobaan</h3>
+        <table class="history">
+          <thead><tr><th>No</th><th>Bahan A</th><th>mA/TA0</th><th>mB/TB0</th><th>Tc</th></tr></thead>
+          <tbody id="history-body"><tr class="empty-row"><td colspan="5">Tekan "Catat Konfigurasi Ini" untuk menyimpan data.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Pilih bahan Benda A, lalu atur massa dan suhu awal Benda A dan Benda B (air).</li>
+      <li>Tekan <b>Mulai Pencampuran</b> dan amati kedua suhu bergerak saling mendekat hingga mencapai suhu akhir (Tc) yang sama.</li>
+      <li>Bandingkan suhu akhir hasil simulasi dengan hasil perhitunganmu sendiri menggunakan Asas Black.</li>
+      <li>Perhatikan: benda dengan kalor jenis atau massa lebih besar cenderung mengubah suhu akhir lebih mendekati suhu awalnya sendiri.</li>
+      <li>Catat beberapa konfigurasi ke tabel, lalu bandingkan hasilnya di LKS.</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> Asas Black — kalor yang dilepas benda bersuhu tinggi sama dengan kalor yang diterima benda bersuhu rendah (Q lepas = Q terima), hingga tercapai kesetimbangan termal pada suhu akhir Tc.</li>
+      <li><b>Asumsi simulasi:</b> kalor yang diserap wadah/kalorimeter diabaikan (asumsi umum pada soal Asas Black tingkat SMA), dan animasi pergerakan suhu bersifat ilustratif (bukan skala waktu fisis yang presisi).</li>
+      <li><b>Poin diskusi:</b> mengapa Tc selalu berada di antara suhu awal kedua benda, dan mengapa Tc lebih dekat ke suhu benda dengan nilai m·c (kapasitas kalor) yang lebih besar?</li>
+      <li>LKS pendamping ada di folder <code>worksheet/</code>, panduan lengkap di <code>README.md</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SMA · Topik: Asas Black &amp; Kesetimbangan Termal.</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const C_AIR = 4200;
+
+  let state = {
+    cA:450, labelA:'Besi', mA:0.5, tA0:150,
+    mB:1.0, tB0:20,
+    t:0, playing:false, attempt:0
+  };
+
+  function computeTc(){
+    const num = state.mA*state.cA*state.tA0 + state.mB*C_AIR*state.tB0;
+    const den = state.mA*state.cA + state.mB*C_AIR;
+    return num/den;
+  }
+
+  function tempsAtTime(t){
+    const Tc = computeTc();
+    const tau = 4; // seconds, illustrative time constant
+    const TA = Tc + (state.tA0-Tc)*Math.exp(-t/tau);
+    const TB = Tc + (state.tB0-Tc)*Math.exp(-t/tau);
+    return {TA,TB,Tc};
+  }
+
+  document.getElementById('matA-row').addEventListener('click', e=>{
+    const btn=e.target.closest('.choice-btn'); if(!btn) return;
+    document.querySelectorAll('#matA-row .choice-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.cA=+btn.dataset.c; state.labelA=btn.dataset.label;
+    refresh();
+  });
+
+  ['ma','tA0','mb','tB0'].forEach(key=>{
+    const slider=document.getElementById(key+'-slider');
+    slider.addEventListener('input', ()=>{
+      if(key==='ma') state.mA=+slider.value;
+      if(key==='tA0') state.tA0=+slider.value;
+      if(key==='mb') state.mB=+slider.value;
+      if(key==='tB0') state.tB0=+slider.value;
+      document.getElementById(key+'-val').textContent = slider.value + (key.includes('m')?' kg':' °C');
+      state.t=0; state.playing=false;
+      document.getElementById('play-btn').textContent='▶️ Mulai Pencampuran';
+      refresh();
+    });
+  });
+
+  document.getElementById('play-btn').addEventListener('click', ()=>{
+    state.playing=!state.playing;
+    document.getElementById('play-btn').textContent = state.playing? '⏸️ Jeda':'▶️ Mulai Pencampuran';
+    if(state.playing) requestAnimationFrame(loop);
+  });
+
+  document.getElementById('log-btn').addEventListener('click', ()=>{
+    const Tc=computeTc();
+    state.attempt++;
+    const tbody=document.getElementById('history-body');
+    const empty=tbody.querySelector('.empty-row'); if(empty) empty.remove();
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${state.attempt}</td><td>${state.labelA}</td><td>${state.mA}kg/${state.tA0}°C</td><td>${state.mB}kg/${state.tB0}°C</td><td>${Tc.toFixed(1)}°C</td>`;
+    tbody.appendChild(tr);
+  });
+
+  let lastTs=null;
+  function loop(ts){
+    if(!state.playing) return;
+    if(lastTs===null) lastTs=ts;
+    const dt=(ts-lastTs)/1000;
+    lastTs=ts;
+    state.t += dt;
+    refresh();
+    if(state.t>20){ state.playing=false; document.getElementById('play-btn').textContent='▶️ Mulai Pencampuran'; lastTs=null; return; }
+    requestAnimationFrame(loop);
+  }
+
+  function refresh(){
+    const {TA,TB,Tc} = tempsAtTime(state.t);
+    document.getElementById('hud-ta').textContent = TA.toFixed(1)+' °C';
+    document.getElementById('hud-tb').textContent = TB.toFixed(1)+' °C';
+    document.getElementById('hud-tc').textContent = Tc.toFixed(1)+' °C';
+    document.getElementById('hud-time').textContent = state.t.toFixed(1)+' s';
+    updateCalc(Tc);
+    draw(TA,TB,Tc);
+  }
+
+  function updateCalc(Tc){
+    document.getElementById('calc-box').innerHTML =
+      `<b>Asas Black:</b> Q lepas = Q terima<br>` +
+      `mA·cA·(TA0−Tc) = mB·cB·(Tc−TB0)<br>` +
+      `${state.mA}×${state.cA}×(${state.tA0}−Tc) = ${state.mB}×${C_AIR}×(Tc−${state.tB0})<br>` +
+      `Tc = (mA·cA·TA0 + mB·cB·TB0) / (mA·cA + mB·cB)<br>` +
+      `Tc = <b class="mono">${Tc.toFixed(1)} °C</b>`;
+  }
+
+  function draw(TA,TB,Tc){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#fbfbfd'; ctx.fillRect(0,0,W,H);
+    drawGrid();
+
+    // container with water
+    const contX=100, contY=60, contW=220, contH=260;
+    ctx.strokeStyle='#5b6178'; ctx.lineWidth=4;
+    ctx.beginPath();
+    ctx.moveTo(contX,contY); ctx.lineTo(contX,contY+contH); ctx.lineTo(contX+contW,contY+contH); ctx.lineTo(contX+contW,contY);
+    ctx.stroke();
+
+    const waterColor = tempToColor(TB);
+    ctx.fillStyle=waterColor;
+    ctx.fillRect(contX+3, contY+70, contW-6, contH-73);
+
+    // object A (block) inside water
+    const objColor = tempToColor(TA);
+    ctx.fillStyle=objColor;
+    ctx.strokeStyle='#161c26'; ctx.lineWidth=2;
+    const ox=contX+contW/2-30, oy=contY+130;
+    ctx.fillRect(ox,oy,60,60);
+    ctx.strokeRect(ox,oy,60,60);
+    ctx.fillStyle='#fff'; ctx.font='bold 11px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText(state.labelA, ox+30, oy+34);
+    ctx.fillText(TA.toFixed(0)+'°C', ox+30, oy+48);
+
+    ctx.fillStyle='#2f6fed'; ctx.font='bold 12px IBM Plex Mono'; ctx.textAlign='left';
+    ctx.fillText('Air: '+TB.toFixed(0)+'°C', contX, contY-10);
+
+    // graph
+    const gx=420, gy=40, gw=420, gh=230;
+    ctx.strokeStyle='#c7ccdc'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx,gy+gh); ctx.lineTo(gx+gw,gy+gh); ctx.stroke();
+
+    const minT=Math.min(0,state.tB0)-10, maxT=state.tA0+10;
+    function ty(temp){ return gy+gh-((temp-minT)/(maxT-minT))*gh; }
+
+    // plot curves over t=0..20
+    ctx.strokeStyle='#e2493d'; ctx.lineWidth=2.2; ctx.beginPath();
+    for(let tt=0; tt<=20; tt+=0.5){
+      const {TA:ta} = tempsAtTime(tt);
+      const x=gx+(tt/20)*gw, y=ty(ta);
+      if(tt===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.strokeStyle='#2f6fed'; ctx.lineWidth=2.2; ctx.beginPath();
+    for(let tt=0; tt<=20; tt+=0.5){
+      const {TB:tb} = tempsAtTime(tt);
+      const x=gx+(tt/20)*gw, y=ty(tb);
+      if(tt===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    // Tc line
+    ctx.strokeStyle='#b8912c'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(gx,ty(Tc)); ctx.lineTo(gx+gw,ty(Tc)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#8a6a10'; ctx.font='11px IBM Plex Mono'; ctx.textAlign='left';
+    ctx.fillText('Tc='+Tc.toFixed(1)+'°C', gx+gw-90, ty(Tc)-6);
+
+    // marker
+    const mx = gx+(Math.min(state.t,20)/20)*gw;
+    ctx.fillStyle='#e2493d'; ctx.beginPath(); ctx.arc(mx,ty(TA),4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#2f6fed'; ctx.beginPath(); ctx.arc(mx,ty(TB),4,0,Math.PI*2); ctx.fill();
+
+    ctx.fillStyle='#616a92'; ctx.font='11px IBM Plex Sans'; ctx.textAlign='center';
+    ctx.fillText('Waktu (s) →', gx+gw/2, gy+gh+20);
+    ctx.textAlign='left';
+    ctx.fillStyle='#e2493d'; ctx.fillText('● Suhu A', gx, gy-10);
+    ctx.fillStyle='#2f6fed'; ctx.fillText('● Suhu B', gx+80, gy-10);
+  }
+
+  function tempToColor(temp){
+    const t=Math.max(0,Math.min(1,(temp-0)/200));
+    const r=Math.round(60+t*195), g=Math.round(140-t*100), b=Math.round(220-t*180);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  function drawGrid(){
+    ctx.strokeStyle='#eef0f8'; ctx.lineWidth=1;
+    for(let x=0;x<W;x+=24){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for(let y=0;y<H;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  }
+
+  refresh();
+})();
+</script>
+</body>
+</html>

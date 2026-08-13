@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lensa & Alat Optik - SMA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef1f5; --ink:#161c26; --muted:#5c6478; --card:#ffffff;
+    --console:#161c26; --console-text:#e8ecf5; --console-dim:#8891ab;
+    --gold:#b8912c; --purple:#7c5cff; --green:#1f9d63; --red:#e2493d; --blue:#2f6fed;
+    --radius:16px; --shadow:0 12px 28px rgba(22,28,38,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;padding-bottom:40px;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  .breadcrumb{max-width:1180px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096a8;}
+  .breadcrumb a{color:var(--muted);text-decoration:none;}
+  .breadcrumb a:hover{color:var(--gold);text-decoration:underline;}
+
+  header.top{max-width:1180px;margin:0 auto;padding:12px 20px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{width:48px;height:48px;border-radius:10px;background:var(--console);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold);box-shadow:var(--shadow);}
+  .brand h1{font-size:22px;margin:0;line-height:1.15;font-weight:600;}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:600;}
+  .level-track{display:flex;gap:8px;}
+  .level-pill{font-size:13px;padding:7px 14px;border-radius:999px;font-weight:700;border:2px solid transparent;}
+  .level-pill.done{background:#e7f7ee;color:#1c8a52;border-color:#bfe9d3;text-decoration:none;cursor:pointer;}
+  .level-pill.done:hover{border-color:#1c8a52;}
+  .level-pill.active{background:var(--console);color:var(--gold);}
+
+  main{max-width:1180px;margin:0 auto;padding:8px 20px;}
+  .layout{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:920px){ .layout{grid-template-columns:1fr;} }
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .scene-wrap{position:relative;border-radius:12px;overflow:hidden;background:#fbfbfd;border:1px solid #e3e6ef;}
+  canvas#scene{display:block;width:100%;height:auto;}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 4px 2px;font-size:12px;font-weight:600;color:var(--muted);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+
+  .console{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;background:var(--console);border-radius:12px;padding:12px 14px;}
+  .console .readout{flex:1;min-width:88px;}
+  .console .readout .l{font-size:10px;color:var(--console-dim);letter-spacing:.4px;text-transform:uppercase;font-weight:700;}
+  .console .readout .v{font-size:16px;color:var(--console-text);font-weight:600;}
+  .console .readout .v.status{font-size:12.5px;color:var(--gold);}
+
+  .card h3{margin:0 0 10px;font-size:16px;font-weight:600;}
+  .field{margin-bottom:16px;}
+  .field .row-label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;}
+  .field .row-label span.val{color:var(--gold);font-family:'IBM Plex Mono';}
+  input[type=range]{width:100%;accent-color:var(--gold);}
+
+  .choice-row{display:flex;gap:8px;margin-bottom:6px;}
+  .choice-btn{flex:1;border:2px solid #e3e6ef;background:#fbfbfd;border-radius:10px;padding:9px 6px;font-weight:700;font-size:13px;color:var(--ink);cursor:pointer;text-align:center;}
+  .choice-btn.selected{border-color:var(--gold);background:#fbf3df;color:#8a6a10;}
+
+  .preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;margin-bottom:14px;}
+  .preset-btn{flex:1;min-width:100px;border:1.5px dashed #c9cfe0;background:#fff;border-radius:8px;padding:6px 4px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;}
+  .preset-btn:hover{border-color:var(--gold);color:#8a6a10;}
+
+  .theory-box{background:var(--paper);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12.8px;line-height:1.85;}
+  .theory-box b.mono{color:var(--gold);}
+
+  table.history{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px;}
+  table.history th,table.history td{padding:5px 3px;text-align:center;border-bottom:1px solid #eef0fa;}
+  table.history th{color:var(--muted);font-size:9.5px;text-transform:uppercase;}
+  .empty-row td{color:#b7bad2;font-style:italic;padding:14px 0;}
+  .reset-btn{width:100%;padding:10px;border-radius:10px;border:2px solid #e3e6ef;background:#fff;font-weight:800;color:var(--muted);cursor:pointer;margin-top:10px;}
+
+  details.help{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-top:18px;}
+  details.help + details.help{margin-top:12px;}
+  details.help summary{font-family:'Fraunces';font-size:16px;cursor:pointer;list-style:none;font-weight:600;}
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--gold);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol,details.help ul{padding-left:20px;line-height:1.8;}
+
+  footer{max-width:1180px;margin:26px auto 0;padding:0 20px;font-size:12px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Optik &amp; Cahaya</a> › <b>SMA</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🔬</div>
+    <div>
+      <h1>Lensa &amp; Alat Optik</h1>
+      <p>Simulasi Fisika Interaktif — Seri 3 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <a class="level-pill done" href="../sd/index.html">← SD</a>
+    <a class="level-pill done" href="../smp/index.html">← SMP</a>
+    <span class="level-pill active">SMA</span>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <div class="card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="380"></canvas>
+      </div>
+      <div class="legend">
+        <span><i style="background:#7c5cff"></i>Sinar sejajar sumbu</span>
+        <span><i style="background:#1f9d63"></i>Sinar melalui pusat</span>
+        <span><i style="background:#e2493d"></i>Sinar melalui fokus</span>
+        <span><i style="background:#9aa0c0"></i>Perpanjangan maya (putus-putus)</span>
+      </div>
+
+      <div class="console">
+        <div class="readout"><div class="l">Jarak Benda (s)</div><div class="v mono" id="hud-s">20 cm</div></div>
+        <div class="readout"><div class="l">Jarak Bayangan (s')</div><div class="v mono" id="hud-s2">—</div></div>
+        <div class="readout"><div class="l">Perbesaran (M)</div><div class="v mono" id="hud-m">—</div></div>
+        <div class="readout"><div class="l">Sifat Bayangan</div><div class="v status" id="hud-status">—</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>⚙️ Pengaturan Lensa</h3>
+
+        <div class="field">
+          <div class="row-label"><span>Jenis Lensa</span></div>
+          <div class="choice-row" id="lens-row">
+            <button class="choice-btn selected" data-type="cembung">Cembung (+)</button>
+            <button class="choice-btn" data-type="cekung">Cekung (−)</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="row-label"><span>Jarak Fokus (f)</span><span class="val mono" id="f-val">10 cm</span></div>
+          <input type="range" id="f-slider" min="5" max="20" step="1" value="10">
+        </div>
+        <div class="field">
+          <div class="row-label"><span>Jarak Benda (s)</span><span class="val mono" id="s-val">20 cm</span></div>
+          <input type="range" id="s-slider" min="2" max="40" step="1" value="20">
+        </div>
+
+        <div class="preset-row" id="preset-row">
+          <button class="preset-btn" data-s="5">🔎 Kaca Pembesar (s&lt;f)</button>
+          <button class="preset-btn" data-s="15">📽️ Proyektor (f&lt;s&lt;2f)</button>
+          <button class="preset-btn" data-s="30">📷 Kamera (s&gt;2f)</button>
+        </div>
+
+        <button class="reset-btn" id="reset-btn">↺ Catat Konfigurasi Ini</button>
+
+        <div class="theory-box" id="calc-box"></div>
+      </div>
+
+      <div class="card">
+        <h3>📒 Catatan Percobaan</h3>
+        <table class="history">
+          <thead><tr><th>No</th><th>Jenis</th><th>f</th><th>s</th><th>s'</th><th>M</th><th>Sifat</th></tr></thead>
+          <tbody id="history-body"><tr class="empty-row"><td colspan="7">Tekan "Catat Konfigurasi Ini" untuk menyimpan data.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Pilih jenis lensa: <b>Cembung</b> (konvergen) atau <b>Cekung</b> (divergen).</li>
+      <li>Atur jarak fokus (f) dan jarak benda (s), lalu amati tiga sinar istimewa yang digambar otomatis dan titik bayangan yang terbentuk.</li>
+      <li>Perhatikan apakah bayangan <b>nyata</b> (garis sinar solid berpotongan) atau <b>maya</b> (garis putus-putus, perpanjangan ke belakang).</li>
+      <li>Coba tombol preset (Kaca Pembesar, Proyektor, Kamera) untuk melihat penerapan nyata lensa cembung pada alat optik.</li>
+      <li>Catat beberapa konfigurasi ke tabel, lalu bandingkan hasilnya di LKS.</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> pembentukan bayangan pada lensa cembung dan cekung menggunakan tiga sinar istimewa, persamaan lensa tipis (1/f = 1/s + 1/s'), dan perbesaran bayangan (M = -s'/s).</li>
+      <li><b>Kasus penting yang bisa dieksplorasi:</b> s &lt; f pada lensa cembung menghasilkan bayangan maya diperbesar (prinsip kaca pembesar/lup); f &lt; s &lt; 2f menghasilkan bayangan nyata diperbesar (prinsip proyektor); s &gt; 2f menghasilkan bayangan nyata diperkecil (prinsip kamera/mata).</li>
+      <li><b>Lensa cekung</b> selalu menghasilkan bayangan maya, tegak, dan diperkecil — cocok untuk mendiskusikan penerapannya pada kacamata rabun jauh (miopi).</li>
+      <li>LKS pendamping ada di folder <code>worksheet/</code>, panduan lengkap di <code>README.md</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SMA · Topik: Lensa Cembung &amp; Cekung, Persamaan Lensa Tipis, Alat Optik.</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const lensX = 450, axisY = 190;
+  const scale = 7;      // px per cm (horizontal)
+  const hScale = 11;    // px per cm (vertical / height)
+  const hObj = 3;        // object height in cm
+
+  let state = { type:'cembung', f:10, s:20, attempt:0 };
+
+  document.getElementById('lens-row').addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    document.querySelectorAll('#lens-row .choice-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.type = btn.dataset.type;
+    document.getElementById('preset-row').style.display = state.type==='cembung' ? 'flex':'none';
+    refresh();
+  });
+  document.getElementById('f-slider').addEventListener('input', e=>{
+    state.f = +e.target.value;
+    document.getElementById('f-val').textContent = state.f+' cm';
+    refresh();
+  });
+  document.getElementById('s-slider').addEventListener('input', e=>{
+    state.s = +e.target.value;
+    document.getElementById('s-val').textContent = state.s+' cm';
+    refresh();
+  });
+  document.getElementById('preset-row').addEventListener('click', e=>{
+    const btn = e.target.closest('.preset-btn'); if(!btn) return;
+    const sVal = Math.max(2, Math.min(40, +btn.dataset.s));
+    state.s = sVal;
+    document.getElementById('s-slider').value = sVal;
+    document.getElementById('s-val').textContent = sVal+' cm';
+    refresh();
+  });
+  document.getElementById('reset-btn').addEventListener('click', ()=>{
+    const c = compute();
+    state.attempt++;
+    const tbody = document.getElementById('history-body');
+    const empty = tbody.querySelector('.empty-row');
+    if(empty) empty.remove();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${state.attempt}</td><td>${state.type}</td><td>${state.f}</td><td>${state.s}</td><td>${c.infinite?'∞':c.sPrime.toFixed(1)}</td><td>${c.infinite?'—':c.m.toFixed(2)}</td><td>${c.sifat}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  function compute(){
+    const fSigned = state.type==='cembung' ? state.f : -state.f;
+    const inv = 1/fSigned - 1/state.s;
+    if(Math.abs(inv) < 0.0008){
+      return {infinite:true};
+    }
+    const sPrime = 1/inv;
+    const m = -sPrime/state.s;
+    const nyataMaya = sPrime>0 ? 'Nyata' : 'Maya';
+    const tegakTerbalik = m<0 ? 'Terbalik' : 'Tegak';
+    const ukuran = Math.abs(m)>1.02 ? 'Diperbesar' : (Math.abs(m)<0.98 ? 'Diperkecil' : 'Sama besar');
+    const sifat = `${nyataMaya}, ${tegakTerbalik}, ${ukuran}`;
+    return {infinite:false, sPrime, m, sifat, nyataMaya, tegakTerbalik, ukuran};
+  }
+
+  function refresh(){
+    const c = compute();
+    document.getElementById('hud-s').textContent = state.s+' cm';
+    if(c.infinite){
+      document.getElementById('hud-s2').textContent = '∞';
+      document.getElementById('hud-m').textContent = '—';
+      document.getElementById('hud-status').textContent = 'Sinar sejajar (tak berpotongan)';
+    } else {
+      document.getElementById('hud-s2').textContent = c.sPrime.toFixed(1)+' cm';
+      document.getElementById('hud-m').textContent = c.m.toFixed(2)+'×';
+      document.getElementById('hud-status').textContent = c.sifat;
+    }
+    updateCalc(c);
+    draw(c);
+  }
+
+  function updateCalc(c){
+    const fSigned = state.type==='cembung' ? state.f : -state.f;
+    if(c.infinite){
+      document.getElementById('calc-box').innerHTML =
+        `1/f = 1/s + 1/s' → s = f, sehingga sinar-sinar keluar sejajar dan <b class="mono">bayangan terbentuk di jarak tak terhingga.</b>`;
+      return;
+    }
+    document.getElementById('calc-box').innerHTML =
+      `1/f = 1/s + 1/s' → 1/s' = 1/(${fSigned}) − 1/${state.s} = <b class="mono">${(1/c.sPrime).toFixed(4)}</b><br>` +
+      `s' = <b class="mono">${c.sPrime.toFixed(1)} cm</b> (${c.nyataMaya.toLowerCase()}, di ${c.sPrime>0?'belakang':'depan'} lensa)<br>` +
+      `M = −s'/s = <b class="mono">${c.m.toFixed(2)}×</b> → bayangan ${c.tegakTerbalik.toLowerCase()}, ${c.ukuran.toLowerCase()}`;
+  }
+
+  // ---------- DRAWING ----------
+  function draw(c){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#fbfbfd'; ctx.fillRect(0,0,W,H);
+    drawGrid();
+
+    // axis
+    ctx.strokeStyle='#c7ccdc'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(40,axisY); ctx.lineTo(860,axisY); ctx.stroke();
+
+    // lens symbol
+    ctx.strokeStyle='#2f6fed'; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(lensX,50); ctx.lineTo(lensX,330); ctx.stroke();
+    ctx.fillStyle='#2f6fed';
+    if(state.type==='cembung'){
+      drawTri(lensX,50,'up'); drawTri(lensX,330,'down');
+    } else {
+      drawInTri(lensX,50,'up'); drawInTri(lensX,330,'down');
+    }
+
+    // focal points
+    const Ffront = {x:lensX-state.f*scale, y:axisY};
+    const Fback = {x:lensX+state.f*scale, y:axisY};
+    ctx.fillStyle='#b8912c';
+    [Ffront,Fback].forEach(pt=>{
+      ctx.beginPath(); ctx.arc(pt.x,pt.y,4,0,Math.PI*2); ctx.fill();
+    });
+    ctx.font='11px IBM Plex Mono'; ctx.fillStyle='#8a6a10'; ctx.textAlign='center';
+    ctx.fillText('F', Ffront.x, axisY+18);
+    ctx.fillText("F'", Fback.x, axisY+18);
+    ctx.fillText('2F', Ffront.x-state.f*scale, axisY+18);
+    ctx.fillText("2F'", Fback.x+state.f*scale, axisY+18);
+
+    // object
+    const objX = lensX - state.s*scale;
+    const objTopY = axisY - hObj*hScale;
+    drawArrowObj(objX, axisY, objTopY, '#e2493d');
+
+    if(c.infinite){
+      // draw 3 rays as parallel (no convergence)
+      drawParallelCase(objX, objTopY);
+      return;
+    }
+
+    const Ffront_ = Ffront, Fback_ = Fback;
+    const rays = [];
+    // Ray A: parallel to axis, hits lens at objTopY
+    rays.push(rayA(objX,objTopY));
+    // Ray B: through center
+    rays.push(rayB(objX,objTopY));
+    // Ray C: through focal point before lens
+    rays.push(rayC(objX,objTopY, Ffront_, Fback_));
+
+    const real = c.sPrime>0;
+    const colors=['#7c5cff','#1f9d63','#e2493d'];
+    rays.forEach((r,i)=>{
+      // solid forward ray
+      const farX = 830;
+      const t = (farX-r.hitX)/r.dirX;
+      const farY = r.hitY + r.dirY*t;
+      ctx.strokeStyle=colors[i]; ctx.lineWidth=2.4; ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(r.hitX,r.hitY); ctx.lineTo(farX,farY); ctx.stroke();
+
+      if(!real){
+        // dashed backward extension to virtual image
+        const imgX = lensX + c.sPrime*scale;
+        const tb = (imgX-r.hitX)/r.dirX;
+        const imgYr = r.hitY + r.dirY*tb;
+        ctx.strokeStyle='#9aa0c0'; ctx.lineWidth=1.6; ctx.setLineDash([5,4]);
+        ctx.beginPath(); ctx.moveTo(r.hitX,r.hitY); ctx.lineTo(imgX,imgYr); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
+
+    // image marker
+    const imgX = lensX + c.sPrime*scale;
+    const hImg = c.m*hObj;
+    const imgTopY = axisY - hImg*hScale;
+    if(imgX > 20 && imgX < 880){
+      drawArrowObj(imgX, axisY, imgTopY, real? '#1f9d63' : '#9aa0c0', !real);
+    }
+  }
+
+  function drawGrid(){
+    ctx.strokeStyle='#eef0f8'; ctx.lineWidth=1;
+    for(let x=0;x<W;x+=24){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for(let y=0;y<H;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  }
+
+  function drawTri(x,y,dir){
+    ctx.beginPath();
+    if(dir==='up'){ ctx.moveTo(x-10,y+16); ctx.lineTo(x+10,y+16); ctx.lineTo(x,y); }
+    else { ctx.moveTo(x-10,y-16); ctx.lineTo(x+10,y-16); ctx.lineTo(x,y); }
+    ctx.closePath(); ctx.fill();
+  }
+  function drawInTri(x,y,dir){
+    ctx.beginPath();
+    if(dir==='up'){ ctx.moveTo(x-10,y); ctx.lineTo(x+10,y); ctx.lineTo(x,y+16); }
+    else { ctx.moveTo(x-10,y); ctx.lineTo(x+10,y); ctx.lineTo(x,y-16); }
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawArrowObj(x,baseY,tipY,color,dashed){
+    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=3;
+    ctx.setLineDash(dashed?[5,4]:[]);
+    ctx.beginPath(); ctx.moveTo(x,baseY); ctx.lineTo(x,tipY); ctx.stroke();
+    ctx.setLineDash([]);
+    const dir = tipY<baseY? -1:1;
+    ctx.beginPath();
+    ctx.moveTo(x,tipY);
+    ctx.lineTo(x-7,tipY-dir*12);
+    ctx.lineTo(x+7,tipY-dir*12);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function rayA(objX,objTopY){
+    const hitX=lensX, hitY=objTopY;
+    let dx,dy;
+    if(state.type==='cembung'){
+      const Fb = {x:lensX+state.f*scale,y:axisY};
+      dx=Fb.x-hitX; dy=Fb.y-hitY;
+    } else {
+      const Ff = {x:lensX-state.f*scale,y:axisY};
+      dx=hitX-Ff.x; dy=hitY-axisY;
+    }
+    const len=Math.hypot(dx,dy);
+    return {hitX,hitY,dirX:dx/len,dirY:dy/len};
+  }
+  function rayB(objX,objTopY){
+    const dx=lensX-objX, dy=axisY-objTopY;
+    const len=Math.hypot(dx,dy);
+    return {hitX:lensX,hitY:axisY,dirX:dx/len,dirY:dy/len};
+  }
+  function rayC(objX,objTopY,Ffront,Fback){
+    const target = state.type==='cembung' ? Ffront : Fback;
+    const t = (lensX-objX)/(target.x-objX);
+    const hitY = objTopY + t*(target.y-objTopY);
+    return {hitX:lensX,hitY,dirX:1,dirY:0};
+  }
+
+  function drawParallelCase(objX,objTopY){
+    ctx.strokeStyle='#7c5cff'; ctx.lineWidth=2.4;
+    ctx.beginPath(); ctx.moveTo(objX,objTopY); ctx.lineTo(830,objTopY); ctx.stroke();
+    ctx.strokeStyle='#1f9d63';
+    ctx.beginPath(); ctx.moveTo(objX,objTopY); ctx.lineTo(lensX,axisY); ctx.lineTo(830,axisY+(axisY-objTopY)); ctx.stroke();
+  }
+
+  refresh();
+})();
+</script>
+</body>
+</html>

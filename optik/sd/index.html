@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cahaya & Cermin! Simulasi Optik - SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#7fc4ff; --sky-bottom:#e9f8ff;
+    --coral:#ff6b6b; --coral-dark:#e14f4f;
+    --sun:#ffd23f; --ink:#2b2d42;
+    --card:#ffffff; --panel:#fff8ec;
+    --wood:#c98a4b; --wood-dark:#93602c;
+    --radius:22px; --shadow:0 10px 24px rgba(43,45,66,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Nunito',sans-serif;background:linear-gradient(180deg,#cdeaff 0%, #f4fbff 40%);color:var(--ink);min-height:100vh;padding-bottom:40px;}
+  h1,h2,h3,.display{font-family:'Baloo 2',sans-serif;}
+
+  .breadcrumb{max-width:1100px;margin:0 auto;padding:14px 20px 0;font-size:13px;font-weight:700;color:#9096b3;}
+  .breadcrumb a{color:#5b5f7a;text-decoration:none;}
+  .breadcrumb a:hover{color:var(--coral);text-decoration:underline;}
+
+  header.top{max-width:1100px;margin:0 auto;padding:12px 20px 10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(160deg, var(--coral), #ff9b6b);display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:var(--shadow);}
+  .brand h1{font-size:22px;margin:0;line-height:1.1;}
+  .brand p{margin:2px 0 0;font-size:13px;color:#5b5f7a;font-weight:700;}
+  .level-track{display:flex;gap:8px;align-items:center;}
+  .level-pill{font-family:'Baloo 2';font-size:13px;padding:7px 14px;border-radius:999px;font-weight:700;border:2px solid transparent;}
+  .level-pill.active{background:var(--coral);color:#fff;box-shadow:0 4px 10px rgba(255,107,107,.4);}
+  .level-pill.linked{background:#fff;color:#5b5f7a;border-color:#e3e6f5;text-decoration:none;cursor:pointer;}
+  .level-pill.linked:hover{border-color:var(--coral);color:var(--coral-dark);}
+  .level-pill.upcoming{background:#fff;color:#9ba0bd;border-color:#e3e6f5;}
+
+  main{max-width:1100px;margin:0 auto;padding:10px 20px;}
+  .layout{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:860px){ .layout{grid-template-columns:1fr;} }
+
+  .scene-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .scene-wrap{position:relative;border-radius:16px;overflow:hidden;background:var(--sky-bottom);}
+  canvas{display:block;width:100%;height:auto;}
+
+  .speech-bubble{margin-top:12px;background:var(--panel);border:3px solid #ffe3ad;border-radius:18px;padding:12px 16px;font-weight:700;font-size:15px;display:flex;gap:10px;align-items:flex-start;min-height:26px;}
+  .speech-bubble .mascot-face{font-size:26px;}
+
+  .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:18px;}
+  .panel h3{margin:0 0 10px;font-size:17px;}
+
+  .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .choice-btn{flex:1 1 auto;min-width:130px;border:3px solid #e7e9f5;background:#fbfbff;border-radius:14px;padding:10px 8px;font-weight:800;font-size:13px;color:var(--ink);cursor:pointer;text-align:center;}
+  .choice-btn.selected{border-color:var(--coral);background:#fff0ee;color:var(--coral-dark);}
+
+  .field{margin-bottom:16px;}
+  .field .row-label{display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-bottom:6px;}
+  .field .row-label span.val{color:var(--coral-dark);font-family:'Nunito';}
+  input[type=range]{width:100%;accent-color:var(--coral);}
+
+  .stat-row{display:flex;gap:10px;margin-top:14px;}
+  .stat{flex:1;background:var(--panel);border-radius:12px;padding:8px 10px;text-align:center;}
+  .stat .n{font-family:'Baloo 2';font-size:19px;}
+  .stat .l{font-size:11px;font-weight:800;color:#8a8fae;}
+
+  .challenge{background:linear-gradient(160deg,#fff6e0,#ffe9c9);border:3px dashed var(--sun);border-radius:16px;padding:12px 14px;font-weight:800;font-size:14px;margin-top:14px;}
+  #celebrate{display:none;margin-top:8px;font-family:'Baloo 2';color:#3a9c3a;font-size:15px;}
+
+  details.help{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-top:18px;}
+  details.help + details.help{margin-top:12px;}
+  details.help summary{font-family:'Baloo 2';font-size:17px;cursor:pointer;list-style:none;}
+  details.help summary::-webkit-details-marker{display:none;}
+  details.help summary::before{content:"▸ ";color:var(--coral);}
+  details.help[open] summary::before{content:"▾ ";}
+  details.help ol,details.help ul{padding-left:20px;line-height:1.7;}
+
+  footer{max-width:1100px;margin:26px auto 0;padding:0 20px;font-size:12px;color:#8a8fae;text-align:center;}
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb"><a href="../../index.html">🏠 Beranda</a> › <a href="../index.html">Optik &amp; Cahaya</a> › <b>SD</b></nav>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🔦</div>
+    <div>
+      <h1>Cahaya &amp; Cermin!</h1>
+      <p>Simulasi Optik &amp; Cahaya — Seri 1 dari 3</p>
+    </div>
+  </div>
+  <div class="level-track">
+    <span class="level-pill active">SD</span>
+    <a class="level-pill linked" href="../smp/index.html">SMP →</a>
+    <a class="level-pill linked" href="../sma/index.html">SMA →</a>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <div class="scene-card">
+      <div class="scene-wrap">
+        <canvas id="scene" width="900" height="400"></canvas>
+      </div>
+      <div class="speech-bubble">
+        <span class="mascot-face">🙂</span>
+        <span id="tip-text">Halo! Aku Kak Cahaya. Coba pilih percobaan di samping, lalu geser penggesernya untuk melihat apa yang terjadi!</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3>Pilih Percobaan</h3>
+        <div class="choice-row" id="mode-row">
+          <button class="choice-btn selected" data-mode="pantul">🔦 Pemantulan Cahaya</button>
+          <button class="choice-btn" data-mode="bayangan">🪞 Bayangan di Cermin</button>
+        </div>
+
+        <div id="panel-pantul">
+          <div class="field">
+            <div class="row-label"><span>Sudut Datang Cahaya</span><span class="val" id="angle-val">40°</span></div>
+            <input type="range" id="angle-slider" min="10" max="80" step="5" value="40">
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="n" id="stat-datang">40°</div><div class="l">Sudut Datang</div></div>
+            <div class="stat"><div class="n" id="stat-pantul">40°</div><div class="l">Sudut Pantul</div></div>
+          </div>
+        </div>
+
+        <div id="panel-bayangan" style="display:none;">
+          <div class="field">
+            <div class="row-label"><span>Jarak Benda ke Cermin</span><span class="val" id="dist-val">3 kotak</span></div>
+            <input type="range" id="dist-slider" min="1" max="6" step="1" value="3">
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="n" id="stat-dbenda">3</div><div class="l">Jarak Benda</div></div>
+            <div class="stat"><div class="n" id="stat-dbayangan">3</div><div class="l">Jarak Bayangan</div></div>
+          </div>
+        </div>
+
+        <div class="challenge" id="challenge-text">🎯 Amati: apakah sudut datang selalu sama dengan sudut pantul, berapa pun sudutnya kamu ubah?</div>
+        <div id="celebrate">✨ Betul! Sudut datang = sudut pantul, itulah Hukum Pemantulan Cahaya!</div>
+      </div>
+    </div>
+  </div>
+
+  <details class="help" open>
+    <summary>Cara Bermain (untuk siswa)</summary>
+    <ol>
+      <li>Pilih percobaan <b>Pemantulan Cahaya</b> atau <b>Bayangan di Cermin</b>.</li>
+      <li>Pada percobaan Pemantulan Cahaya: geser penggeser sudut, amati sinar datang (kuning) dan sinar pantul (oranye). Bandingkan angka sudut datang dan sudut pantul.</li>
+      <li>Pada percobaan Bayangan di Cermin: geser jarak benda ke cermin, amati bayangan yang terbentuk. Perhatikan jaraknya dan bentuknya (perhatikan hurufnya, apakah terbalik?).</li>
+      <li>Diskusikan dengan temanmu: apa yang selalu sama, dan apa yang berubah?</li>
+    </ol>
+  </details>
+
+  <details class="help">
+    <summary>Petunjuk untuk Guru / Orang Tua</summary>
+    <ul>
+      <li><b>Konsep yang dilatih:</b> Hukum Pemantulan Cahaya (sudut datang = sudut pantul) dan sifat bayangan pada cermin datar (sama besar, tegak, terbalik kiri-kanan, jarak bayangan = jarak benda).</li>
+      <li><b>Cara pakai di kelas:</b> minta siswa memprediksi dulu ("kalau sudutnya diperbesar, sudut pantulnya ikut membesar atau tidak?") sebelum mencoba di simulasi.</li>
+      <li><b>Ide diskusi:</b> hubungkan dengan pengalaman sehari-hari bercermin, memantulkan bola ke dinding, atau permainan cahaya senter dan cermin.</li>
+      <li>LKS pendamping ada di folder <code>worksheet/</code>, panduan lengkap ada di <code>README.md</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>Bagian dari <b>Seri Simulasi Fisika Interaktif</b> — Jenjang SD · Topik: Pemantulan Cahaya &amp; Bayangan pada Cermin Datar.</footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  let state = { mode:'pantul', angle:40, dist:3 };
+
+  document.getElementById('mode-row').addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn');
+    if(!btn) return;
+    document.querySelectorAll('#mode-row .choice-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.mode = btn.dataset.mode;
+    document.getElementById('panel-pantul').style.display = state.mode==='pantul' ? 'block':'none';
+    document.getElementById('panel-bayangan').style.display = state.mode==='bayangan' ? 'block':'none';
+    document.getElementById('challenge-text').textContent = state.mode==='pantul'
+      ? '🎯 Amati: apakah sudut datang selalu sama dengan sudut pantul, berapa pun sudutnya kamu ubah?'
+      : '🎯 Amati: apakah jarak bayangan selalu sama dengan jarak benda ke cermin? Perhatikan juga hurufnya, apakah terbalik?';
+    document.getElementById('celebrate').style.display='none';
+    setTip(state.mode==='pantul'
+      ? "Coba geser sudutnya! Perhatikan sinar kuning (datang) dan sinar oranye (pantul)."
+      : "Coba geser jarak bendanya! Lihat bayangan huruf 'R' di baliknya — apakah sama seperti aslinya?", "🙂");
+    draw();
+  });
+
+  document.getElementById('angle-slider').addEventListener('input', e=>{
+    state.angle = +e.target.value;
+    document.getElementById('angle-val').textContent = state.angle+'°';
+    document.getElementById('stat-datang').textContent = state.angle+'°';
+    document.getElementById('stat-pantul').textContent = state.angle+'°';
+    document.getElementById('celebrate').style.display='block';
+    draw();
+  });
+
+  document.getElementById('dist-slider').addEventListener('input', e=>{
+    state.dist = +e.target.value;
+    document.getElementById('dist-val').textContent = state.dist+' kotak';
+    document.getElementById('stat-dbenda').textContent = state.dist;
+    document.getElementById('stat-dbayangan').textContent = state.dist;
+    document.getElementById('celebrate').style.display='block';
+    draw();
+  });
+
+  function setTip(text, face){
+    document.getElementById('tip-text').textContent = text;
+    document.querySelector('.mascot-face').textContent = face || '🙂';
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#eef6ff';
+    ctx.fillRect(0,0,W,H);
+    if(state.mode==='pantul') drawPantul(); else drawBayangan();
+  }
+
+  function drawPantul(){
+    const hitX=450, hitY=270;
+    const mirrorY=hitY;
+    // mirror (horizontal)
+    ctx.strokeStyle='#5b6178'; ctx.lineWidth=8; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(180,mirrorY); ctx.lineTo(720,mirrorY); ctx.stroke();
+    // hatching under mirror
+    ctx.strokeStyle='#9096b3'; ctx.lineWidth=2;
+    for(let x=190;x<720;x+=18){
+      ctx.beginPath(); ctx.moveTo(x,mirrorY+6); ctx.lineTo(x-10,mirrorY+20); ctx.stroke();
+    }
+    // normal (dashed)
+    ctx.strokeStyle='#b7bad2'; ctx.lineWidth=2; ctx.setLineDash([6,6]);
+    ctx.beginPath(); ctx.moveTo(hitX,mirrorY); ctx.lineTo(hitX,60); ctx.stroke();
+    ctx.setLineDash([]);
+
+    const rad = state.angle*Math.PI/180;
+    const len=200;
+    const srcX = hitX - Math.sin(rad)*len, srcY = hitY - Math.cos(rad)*len;
+    const endX = hitX + Math.sin(rad)*len, endY = hitY - Math.cos(rad)*len;
+
+    // incoming ray
+    ctx.strokeStyle='#ffd23f'; ctx.lineWidth=4; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(srcX,srcY); ctx.lineTo(hitX,hitY); ctx.stroke();
+    drawArrowHead(srcX,srcY,hitX,hitY,'#ffd23f');
+    // reflected ray
+    ctx.strokeStyle='#ff9b3f'; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(hitX,hitY); ctx.lineTo(endX,endY); ctx.stroke();
+    drawArrowHead(hitX,hitY,endX,endY,'#ff9b3f');
+
+    // flashlight icon
+    ctx.font='30px Nunito'; ctx.textAlign='center';
+    ctx.fillText('🔦', srcX + (srcX<hitX? -18:18), srcY-6);
+
+    // angle arcs + labels
+    drawAngleArc(hitX,hitY,90+ state.angle,90, '#e14f4f');
+    drawAngleArc(hitX,hitY,90,90-state.angle,'#2f7ded');
+    ctx.fillStyle='#e14f4f'; ctx.font='bold 13px Nunito'; ctx.textAlign='center';
+    ctx.fillText('θd='+state.angle+'°', hitX-46, hitY-40);
+    ctx.fillStyle='#2f7ded';
+    ctx.fillText('θp='+state.angle+'°', hitX+46, hitY-40);
+  }
+
+  function drawArrowHead(x1,y1,x2,y2,color){
+    const ang = Math.atan2(y2-y1,x2-x1);
+    ctx.fillStyle=color;
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-11*Math.cos(ang-0.4), y2-11*Math.sin(ang-0.4));
+    ctx.lineTo(x2-11*Math.cos(ang+0.4), y2-11*Math.sin(ang+0.4));
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawAngleArc(cx,cy,a1,a2,color){
+    ctx.strokeStyle=color; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.arc(cx,cy,34, a1*Math.PI/180, a2*Math.PI/180, a2<a1);
+    ctx.stroke();
+  }
+
+  function drawBayangan(){
+    const mirrorX=450;
+    // mirror (vertical)
+    const grad = ctx.createLinearGradient(mirrorX-4,0,mirrorX+4,0);
+    grad.addColorStop(0,'#c7ccdc'); grad.addColorStop(0.5,'#f4f6fb'); grad.addColorStop(1,'#c7ccdc');
+    ctx.fillStyle=grad;
+    ctx.fillRect(mirrorX-4,60,8,280);
+    ctx.strokeStyle='#9096b3'; ctx.lineWidth=2;
+    for(let y=66;y<340;y+=16){
+      ctx.beginPath(); ctx.moveTo(mirrorX+4,y); ctx.lineTo(mirrorX+16,y+10); ctx.stroke();
+    }
+
+    const unit=48;
+    const objX = mirrorX - state.dist*unit;
+    const imgX = mirrorX + state.dist*unit;
+    const baseY = 340, topY=140;
+
+    // ground line
+    ctx.strokeStyle='#d7dcef'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(60,baseY); ctx.lineTo(840,baseY); ctx.stroke();
+
+    // distance indicators
+    drawDistLine(objX, baseY+26, mirrorX, baseY+26, '#e14f4f', state.dist);
+    drawDistLine(mirrorX, baseY+26, imgX, baseY+26, '#2f7ded', state.dist);
+
+    // object (letter R, upright)
+    ctx.fillStyle='#e14f4f';
+    ctx.font='bold 90px Baloo 2, sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    ctx.fillText('R', objX, baseY-10);
+
+    // image (mirrored, semi-transparent, dashed outline box)
+    ctx.save();
+    ctx.globalAlpha=0.55;
+    ctx.translate(imgX,0);
+    ctx.scale(-1,1);
+    ctx.fillStyle='#2f7ded';
+    ctx.font='bold 90px Baloo 2, sans-serif';
+    ctx.fillText('R', 0, baseY-10);
+    ctx.restore();
+
+    ctx.strokeStyle='#2f7ded'; ctx.setLineDash([5,5]); ctx.lineWidth=2;
+    ctx.strokeRect(imgX-40, topY, 80, baseY-topY);
+    ctx.setLineDash([]);
+
+    ctx.fillStyle='#5b5f7a'; ctx.font='bold 13px Nunito';
+    ctx.fillText('Benda', objX, topY-10);
+    ctx.fillText('Bayangan (di cermin)', imgX, topY-10);
+  }
+
+  function drawDistLine(x1,y,x2,y2,color,val){
+    ctx.strokeStyle=color; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1,y-6); ctx.lineTo(x1,y+6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2,y-6); ctx.lineTo(x2,y+6); ctx.stroke();
+    ctx.fillStyle=color; ctx.font='bold 12px Nunito'; ctx.textAlign='center';
+    ctx.fillText(val+' kotak', (x1+x2)/2, y+18);
+  }
+
+  draw();
+})();
+</script>
+</body>
+</html>
